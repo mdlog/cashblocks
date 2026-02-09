@@ -1,0 +1,73 @@
+pragma cashscript ^0.11.0;
+
+// Vault Primitive
+// A UTXO that stores funds with a spending policy (owner, limit, whitelist).
+// The vault enforces that:
+//   - Only the owner can spend
+//   - Each spend is within the spend limit
+//   - Funds go only to whitelisted destination
+//   - Remaining funds return to the same vault covenant
+
+contract Vault(pubkey ownerPk, int spendLimit, bytes20 whitelistHash) {
+
+    // Spend up to spendLimit and send remainder back to the same vault.
+    // Output 0: whitelisted destination (spendAmount)
+    // Output 1: continuation vault (change)
+    function partialSpend(sig ownerSig, int spendAmount) {
+        require(checkSig(ownerSig, ownerPk));
+
+        require(spendAmount > 0);
+        require(spendAmount <= spendLimit);
+
+        int minerFee = 1000;
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int changeValue = inputValue - spendAmount - minerFee;
+
+        // Output 0: send to whitelisted P2PKH address
+        bytes25 whitelistLocking = new LockingBytecodeP2PKH(whitelistHash);
+        require(tx.outputs[0].lockingBytecode == whitelistLocking);
+        require(tx.outputs[0].value == spendAmount);
+
+        // Output 1: continuation vault with same locking bytecode (covenant)
+        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;
+        if (changeValue > 546) {
+            require(tx.outputs[1].lockingBytecode == selfLocking);
+            require(tx.outputs[1].value == changeValue);
+        }
+    }
+
+    // Drain the vault entirely when balance is within spendLimit.
+    function fullSpend(sig ownerSig) {
+        require(checkSig(ownerSig, ownerPk));
+
+        int minerFee = 1000;
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int spendAmount = inputValue - minerFee;
+
+        require(spendAmount > 0);
+        require(spendAmount <= spendLimit);
+
+        bytes25 whitelistLocking = new LockingBytecodeP2PKH(whitelistHash);
+        require(tx.outputs[0].lockingBytecode == whitelistLocking);
+        require(tx.outputs[0].value == spendAmount);
+    }
+
+    // For composed transactions with other primitives.
+    // Validates vault rules but allows flexible output index for continuation.
+    function composableSpend(sig ownerSig, int spendAmount, int continuationIndex) {
+        require(checkSig(ownerSig, ownerPk));
+
+        require(spendAmount > 0);
+        require(spendAmount <= spendLimit);
+
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int changeValue = inputValue - spendAmount;
+
+        // Continuation vault at caller-specified output index
+        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;
+        if (changeValue > 546) {
+            require(tx.outputs[continuationIndex].lockingBytecode == selfLocking);
+            require(tx.outputs[continuationIndex].value >= changeValue);
+        }
+    }
+}

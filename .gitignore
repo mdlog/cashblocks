@@ -1,0 +1,7 @@
+node_modules/
+dist/
+artifacts/
+*.tsbuildinfo
+.env
+.keys.json
+.deploy.json

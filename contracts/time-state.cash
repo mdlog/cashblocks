@@ -1,0 +1,55 @@
+pragma cashscript ^0.11.0;
+
+// Time-State Primitive
+// A UTXO whose spending rights change based on time phases:
+//   Phase 0 (Locked):       tx.time < phase1Time  → no spend allowed
+//   Phase 1 (Restricted):   phase1Time <= tx.time < phase2Time → partial spend, must continue
+//   Phase 2 (Unrestricted): tx.time >= phase2Time → full spend, no continuation needed
+
+contract TimeState(pubkey ownerPk, int phase1Time, int phase2Time) {
+
+    // Phase 1: Restricted spend. Must leave a continuation UTXO.
+    function spendRestricted(sig ownerSig, int spendAmount) {
+        require(checkSig(ownerSig, ownerPk));
+
+        // Enforce Phase 1 time window
+        require(tx.time >= phase1Time);
+        require(tx.locktime < phase2Time);
+
+        int minerFee = 1000;
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int changeValue = inputValue - spendAmount - minerFee;
+
+        require(spendAmount > 0);
+        require(changeValue > 546); // Must leave funds behind in Phase 1
+
+        // Covenant: continuation UTXO at output 0
+        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;
+        require(tx.outputs[0].lockingBytecode == selfLocking);
+        require(tx.outputs[0].value == changeValue);
+    }
+
+    // Phase 2: Unrestricted spend. Owner has full control.
+    function spendUnrestricted(sig ownerSig) {
+        require(checkSig(ownerSig, ownerPk));
+
+        // Enforce Phase 2
+        require(tx.time >= phase2Time);
+
+        // No covenant — owner can spend freely
+    }
+
+    // For composed transactions. Validates that the current phase is active.
+    function composableCheck(sig ownerSig, int requiredPhase) {
+        require(checkSig(ownerSig, ownerPk));
+
+        if (requiredPhase == 1) {
+            require(tx.time >= phase1Time);
+            require(tx.locktime < phase2Time);
+        } else {
+            // Phase 2
+            require(requiredPhase == 2);
+            require(tx.time >= phase2Time);
+        }
+    }
+}

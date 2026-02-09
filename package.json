@@ -1,0 +1,37 @@
+{
+  "name": "cashblocks",
+  "version": "0.1.0",
+  "description": "CashBlocks — Composable UTXO building blocks for Bitcoin Cash. Vault, Time-State, and Oracle Proof primitives.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "compile:contracts": "cashc contracts/vault.cash --output artifacts/vault.json && cashc contracts/time-state.cash --output artifacts/time-state.json && cashc contracts/oracle-proof.cash --output artifacts/oracle-proof.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example:vault": "tsx examples/01-vault-basic.ts",
+    "example:timestate": "tsx examples/02-time-state-basic.ts",
+    "example:oracle": "tsx examples/03-oracle-proof-basic.ts",
+    "example:vesting": "tsx examples/04-vault-with-timelock.ts",
+    "example:treasury": "tsx examples/05-conditional-treasury.ts",
+    "example:vesting-schedule": "tsx examples/06-vesting-schedule.ts",
+    "keys:generate": "tsx scripts/generate-keys.ts",
+    "deploy:chipnet": "tsx scripts/deploy-chipnet.ts",
+    "test:chipnet": "tsx scripts/test-chipnet.ts"
+  },
+  "dependencies": {
+    "cashc": "^0.11.0",
+    "cashscript": "^0.11.0",
+    "unspent": "^0.2.19"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

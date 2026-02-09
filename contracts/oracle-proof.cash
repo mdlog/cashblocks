@@ -1,0 +1,92 @@
+pragma cashscript ^0.11.0;
+
+// Oracle Proof Primitive
+// Verifies off-chain data signed by a trusted oracle.
+// Oracle message format: [domain 4B][timestamp 4B][nonce 4B][payload NB]
+// The oracle signs the full message using Schnorr signature.
+// This UTXO is stateless — consumed and destroyed after verification.
+
+contract OracleProof(pubkey oraclePk, bytes4 domainSeparator, int expiryDuration) {
+
+    // Verify oracle data and allow a spender to spend.
+    function verifyAndSpend(
+        pubkey spenderPk,
+        sig spenderSig,
+        datasig oracleSig,
+        bytes oracleMessage
+    ) {
+        // Verify spender authorization
+        require(checkSig(spenderSig, spenderPk));
+
+        // Verify oracle signature over the message
+        require(checkDataSig(oracleSig, oracleMessage, oraclePk));
+
+        // Parse message: [domain(4)][timestamp(4)][nonce(4)][payload(N)]
+        bytes4 msgDomain, bytes rest1 = oracleMessage.split(4);
+        bytes4 msgTimestamp, bytes rest2 = rest1.split(4);
+
+        // Extract nonce (first 4 bytes of rest2)
+        bytes4 msgNonce = bytes4(rest2.slice(0, 4));
+
+        // Validate domain separator
+        require(msgDomain == domainSeparator);
+
+        // Validate timestamp: not expired
+        int timestamp = int(msgTimestamp);
+        require(tx.time >= timestamp);
+        require(tx.locktime <= timestamp + expiryDuration);
+
+        // Nonce must be non-zero (replay protection)
+        require(int(msgNonce) != 0);
+    }
+
+    // For composed transactions. Validates oracle proof without spender sig.
+    function composableVerify(
+        datasig oracleSig,
+        bytes oracleMessage
+    ) {
+        // Verify oracle signature
+        require(checkDataSig(oracleSig, oracleMessage, oraclePk));
+
+        // Parse and validate
+        bytes4 msgDomain, bytes rest1 = oracleMessage.split(4);
+        bytes4 msgTimestamp, bytes rest2 = rest1.split(4);
+        bytes4 msgNonce = bytes4(rest2.slice(0, 4));
+
+        require(msgDomain == domainSeparator);
+
+        int timestamp = int(msgTimestamp);
+        require(tx.time >= timestamp);
+        require(tx.locktime <= timestamp + expiryDuration);
+
+        require(int(msgNonce) != 0);
+    }
+
+    // Verify oracle data with a minimum payload value constraint.
+    function verifyWithPayloadConstraint(
+        pubkey spenderPk,
+        sig spenderSig,
+        datasig oracleSig,
+        bytes oracleMessage,
+        int requiredMinValue
+    ) {
+        require(checkSig(spenderSig, spenderPk));
+        require(checkDataSig(oracleSig, oracleMessage, oraclePk));
+
+        bytes4 msgDomain, bytes rest1 = oracleMessage.split(4);
+        bytes4 msgTimestamp, bytes rest2 = rest1.split(4);
+        bytes4 msgNonce, bytes payload = rest2.split(4);
+
+        require(msgDomain == domainSeparator);
+
+        int timestamp = int(msgTimestamp);
+        require(tx.time >= timestamp);
+        require(tx.locktime <= timestamp + expiryDuration);
+        require(int(msgNonce) != 0);
+
+        // Payload first 4 bytes = oracle value, must meet minimum
+        bytes4 valueBin = bytes4(payload.slice(0, 4));
+        int oracleValue = int(valueBin);
+        require(oracleValue >= requiredMinValue);
+    }
+}
