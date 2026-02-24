@@ -9,7 +9,7 @@
   let totalBlocked = 0;
   let totalProcessed = 0;
   const stepCounts = {};
-  let currentMode = 'mock'; // 'mock' or 'chipnet'
+  let currentMode = 'chipnet';
   var prevDashValues = {}; // for animated counters
 
   // ─── Toast System ───
@@ -89,9 +89,7 @@
     var overlay = document.getElementById('lending-loading-overlay');
     var subtext = document.getElementById('loading-subtext');
     if (overlay) overlay.style.display = '';
-    if (subtext) subtext.textContent = currentMode === 'chipnet'
-      ? 'Funding contracts on chipnet...'
-      : 'Deploying mock contracts...';
+    if (subtext) subtext.textContent = 'Funding contracts on chipnet...';
   }
   function hideLoadingOverlay() {
     var overlay = document.getElementById('lending-loading-overlay');
@@ -148,23 +146,13 @@
 
   function updateModeUI() {
     var walletSection = document.getElementById('wallet-section');
-    var identitySection = document.getElementById('identity-section');
     var badgeNet = document.getElementById('badge-net');
     var badgeNetText = document.getElementById('badge-net-text');
 
-    if (currentMode === 'chipnet') {
-      if (walletSection) walletSection.style.display = '';
-      if (identitySection) identitySection.style.display = 'none';
-      if (badgeNet) badgeNet.classList.add('badge-chipnet-active');
-      if (badgeNetText) badgeNetText.textContent = 'Chipnet';
-      loadWalletStatus();
-    } else {
-      if (walletSection) walletSection.style.display = 'none';
-      if (identitySection) identitySection.style.display = '';
-      if (badgeNet) badgeNet.classList.remove('badge-chipnet-active');
-      if (badgeNetText) badgeNetText.textContent = 'Testnet';
-      renderIdentityPanel();
-    }
+    if (walletSection) walletSection.style.display = '';
+    if (badgeNet) badgeNet.classList.add('badge-chipnet-active');
+    if (badgeNetText) badgeNetText.textContent = 'Chipnet';
+    loadWalletStatus();
   }
 
   // ─── Sidebar Navigation ───
@@ -216,9 +204,9 @@
       code: 'import { VaultPrimitive, TimeStatePrimitive,\n' +
         '         OracleProofPrimitive, TokenGatePrimitive\n' +
         "} from 'cashblocks';\n" +
-        "import { MockNetworkProvider } from 'cashscript';\n" +
+        "import { ElectrumNetworkProvider } from 'cashscript';\n" +
         '\n' +
-        'const provider = new MockNetworkProvider();\n' +
+        "const provider = new ElectrumNetworkProvider('chipnet');\n" +
         '\n' +
         'const pool = new VaultPrimitive({\n' +
         '  ownerPk: lenderPub,\n' +
@@ -539,17 +527,13 @@
     var countEl = document.getElementById('count-' + name);
     if (countEl) countEl.textContent = '';
 
-    // Route to mock or chipnet endpoint based on current mode
-    var url = currentMode === 'chipnet'
-      ? '/api/chipnet/scenario/' + name
-      : '/api/scenario/' + name;
+    // Route to chipnet endpoint
+    var url = '/api/scenario/' + name;
 
-    // Send chipnet keys from localStorage when in chipnet mode
+    // Send chipnet keys from localStorage
     var fetchBody = {};
-    if (currentMode === 'chipnet') {
-      var chipKeys = ChipnetKeyManager.getKeys();
-      if (chipKeys) fetchBody.keys = chipKeys;
-    }
+    var chipKeys = ChipnetKeyManager.getKeys();
+    if (chipKeys) fetchBody.keys = chipKeys;
 
     fetch(url, {
       method: 'POST',
@@ -934,155 +918,7 @@
   // Also expose globally for debugging
   window.runScenario = runScenario;
 
-  // ═══════════════════════════════════════════
-  // KeyManager — localStorage-backed identity
-  // ═══════════════════════════════════════════
-
-  var KEYS_STORAGE_KEY = 'cashblocks_user_keys';
   var SESSION_STORAGE_KEY = 'cashblocks_lending_session';
-
-  var KeyManager = {
-    getKeys: function() {
-      try {
-        var raw = localStorage.getItem(KEYS_STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch (e) { return null; }
-    },
-    saveKeys: function(keys) {
-      localStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
-    },
-    clearKeys: function() {
-      localStorage.removeItem(KEYS_STORAGE_KEY);
-    },
-    generateKeys: function() {
-      return fetch('/api/keys/generate', { method: 'POST' })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.error) throw new Error(data.error);
-          KeyManager.saveKeys(data);
-          return data;
-        });
-    },
-    downloadKeys: function() {
-      var keys = KeyManager.getKeys();
-      if (!keys) return;
-      var blob = new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'cashblocks-identity-' + keys.address.slice(-8) + '.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    },
-    importKeys: function(file) {
-      return new Promise(function(resolve, reject) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            var keys = JSON.parse(e.target.result);
-            if (!keys.address || !keys.privKey || !keys.pubKey) {
-              throw new Error('Invalid key file: missing address, privKey, or pubKey');
-            }
-            KeyManager.saveKeys(keys);
-            resolve(keys);
-          } catch (err) { reject(err); }
-        };
-        reader.onerror = function() { reject(new Error('Failed to read file')); };
-        reader.readAsText(file);
-      });
-    },
-    getLabel: function() {
-      var keys = KeyManager.getKeys();
-      if (!keys) return 'Anonymous';
-      return keys.address ? keys.address.slice(-8) : 'Anonymous';
-    }
-  };
-
-  // ─── Identity Panel ───
-
-  function renderIdentityPanel() {
-    var keys = KeyManager.getKeys();
-    if (keys) {
-      showIdentity(keys);
-    } else {
-      showNoIdentity();
-    }
-  }
-
-  function showIdentity(keys) {
-    var noKeys = document.getElementById('identity-no-keys');
-    var hasKeys = document.getElementById('identity-has-keys');
-    if (noKeys) noKeys.style.display = 'none';
-    if (hasKeys) hasKeys.style.display = '';
-    var addrEl = document.getElementById('identity-address');
-    if (addrEl) addrEl.textContent = keys.address || '';
-    var pubEl = document.getElementById('identity-pubkey');
-    if (pubEl) pubEl.textContent = keys.pubKey ? (keys.pubKey.slice(0, 16) + '...' + keys.pubKey.slice(-8)) : '';
-  }
-
-  function showNoIdentity() {
-    var noKeys = document.getElementById('identity-no-keys');
-    var hasKeys = document.getElementById('identity-has-keys');
-    if (noKeys) noKeys.style.display = '';
-    if (hasKeys) hasKeys.style.display = 'none';
-  }
-
-  // Wire identity buttons
-  var btnGenIdentity = document.getElementById('btn-generate-identity');
-  if (btnGenIdentity) {
-    btnGenIdentity.addEventListener('click', function() {
-      btnGenIdentity.disabled = true;
-      btnGenIdentity.textContent = 'Generating...';
-      KeyManager.generateKeys()
-        .then(function(keys) {
-          renderIdentityPanel();
-          showToast('success', 'Identity Created', 'Address: ...' + keys.address.slice(-8));
-        })
-        .catch(function(err) { showToast('error', 'Error', err.message); })
-        .finally(function() {
-          btnGenIdentity.disabled = false;
-          btnGenIdentity.textContent = 'Generate Identity';
-        });
-    });
-  }
-
-  var btnDownloadIdentity = document.getElementById('btn-download-identity');
-  if (btnDownloadIdentity) {
-    btnDownloadIdentity.addEventListener('click', function() {
-      KeyManager.downloadKeys();
-      showToast('info', 'Downloaded', 'Key file saved');
-    });
-  }
-
-  var btnImportIdentity = document.getElementById('btn-import-identity');
-  var importFileInput = document.getElementById('import-identity-file');
-  if (btnImportIdentity && importFileInput) {
-    btnImportIdentity.addEventListener('click', function() {
-      importFileInput.click();
-    });
-    importFileInput.addEventListener('change', function() {
-      if (!importFileInput.files || !importFileInput.files[0]) return;
-      KeyManager.importKeys(importFileInput.files[0])
-        .then(function(keys) {
-          renderIdentityPanel();
-          showToast('success', 'Keys Imported', 'Address: ...' + keys.address.slice(-8));
-        })
-        .catch(function(err) { showToast('error', 'Import Failed', err.message); });
-      importFileInput.value = '';
-    });
-  }
-
-  var btnClearIdentity = document.getElementById('btn-clear-identity');
-  if (btnClearIdentity) {
-    btnClearIdentity.addEventListener('click', function() {
-      if (!confirm('Clear your local identity? You can re-import later from a downloaded file.')) return;
-      KeyManager.clearKeys();
-      renderIdentityPanel();
-      showToast('info', 'Identity Cleared', 'localStorage keys removed');
-    });
-  }
 
   // ─── Pool Browser (in Lending Dashboard tab) ───
 
@@ -1128,7 +964,7 @@
       owner.textContent = pool.ownerLabel + "'s Pool";
       info.appendChild(owner);
 
-      var modeBadge = pool.mode === 'chipnet' ? ' (chipnet)' : ' (mock)';
+      var modeBadge = ' (chipnet)';
       var stats = document.createElement('div');
       stats.className = 'pool-browser-stats';
       stats.innerHTML =
@@ -1256,24 +1092,14 @@
     origUpdateModeUI();
     updateInitDefaults();
     loadAvailablePools();
-    if (lendingSession && lendingSession.mode !== currentMode) {
-      if (confirm('Switching modes will destroy the active lending pool. Continue?')) {
-        destroyPoolQuiet();
-      }
-    }
   };
 
   function updateInitDefaults() {
     var poolInput = document.getElementById('init-pool-balance');
     var maxLoanInput = document.getElementById('init-max-loan');
     if (!lendingSession) {
-      if (currentMode === 'chipnet') {
-        if (poolInput) poolInput.value = '50000';
-        if (maxLoanInput) maxLoanInput.value = '10000';
-      } else {
-        if (poolInput) poolInput.value = '5000000';
-        if (maxLoanInput) maxLoanInput.value = '500000';
-      }
+      if (poolInput) poolInput.value = '50000';
+      if (maxLoanInput) maxLoanInput.value = '10000';
     }
   }
 
@@ -1306,19 +1132,17 @@
       poolBalance: poolBalance,
       maxLoan: maxLoan,
       minCreditScore: minScore,
-      ownerLabel: currentMode === 'chipnet' ? ChipnetKeyManager.getLabel() : KeyManager.getLabel(),
+      ownerLabel: ChipnetKeyManager.getLabel(),
     };
-    if (currentMode === 'chipnet') {
-      var chipKeys = ChipnetKeyManager.getKeys();
-      if (!chipKeys) {
-        showInitError('No chipnet wallet found. Generate a wallet first.');
-        hideLoadingOverlay();
-        btnInitPool.disabled = false;
-        btnInitPool.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Initialize Pool';
-        return;
-      }
-      initPayload.keys = chipKeys;
+    var chipKeys = ChipnetKeyManager.getKeys();
+    if (!chipKeys) {
+      showInitError('No chipnet wallet found. Generate a wallet first.');
+      hideLoadingOverlay();
+      btnInitPool.disabled = false;
+      btnInitPool.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Initialize Pool';
+      return;
     }
+    initPayload.keys = chipKeys;
 
     fetch('/api/lending/init', {
       method: 'POST',
@@ -1403,7 +1227,7 @@
     el = document.getElementById('dash-min-score');
     if (el) el.textContent = dash.minCreditScore;
     el = document.getElementById('dash-mode');
-    if (el) el.textContent = dash.mode === 'chipnet' ? 'Chipnet' : 'Mock';
+    if (el) el.textContent = 'Chipnet';
 
     // Store previous values for next animation
     prevDashValues = {
@@ -1458,16 +1282,9 @@
     // Auto-fill recipient address from identity/wallet if available
     var recipientInput = document.getElementById('loan-recipient');
     if (recipientInput && !recipientInput.value) {
-      if (currentMode === 'chipnet') {
-        var chipKeys = ChipnetKeyManager.getKeys();
-        if (chipKeys && chipKeys.recipient) {
-          recipientInput.value = chipKeys.recipient.address;
-        }
-      } else {
-        var mockKeys = KeyManager.getKeys();
-        if (mockKeys && mockKeys.address) {
-          recipientInput.value = mockKeys.address;
-        }
+      var chipKeys = ChipnetKeyManager.getKeys();
+      if (chipKeys && chipKeys.recipient) {
+        recipientInput.value = chipKeys.recipient.address;
       }
     }
   }
@@ -1615,13 +1432,8 @@
       var recipientInput = document.getElementById('loan-recipient');
       if (!recipientInput) return;
       var myAddr = null;
-      if (currentMode === 'chipnet') {
-        var cKeys = ChipnetKeyManager.getKeys();
-        if (cKeys && cKeys.recipient) myAddr = cKeys.recipient.address;
-      } else {
-        var mKeys = KeyManager.getKeys();
-        if (mKeys && mKeys.address) myAddr = mKeys.address;
-      }
+      var cKeys = ChipnetKeyManager.getKeys();
+      if (cKeys && cKeys.recipient) myAddr = cKeys.recipient.address;
       if (myAddr) {
         recipientInput.value = myAddr;
         recipientInput.classList.remove('input-error');
@@ -1687,7 +1499,7 @@
       sessionId: lendingSession.sessionId,
       amount: amount,
       creditScore: score,
-      borrowerLabel: currentMode === 'chipnet' ? ChipnetKeyManager.getLabel() : KeyManager.getLabel(),
+      borrowerLabel: ChipnetKeyManager.getLabel(),
     };
     if (recipientAddr) {
       payload.recipientAddress = recipientAddr;
@@ -1916,13 +1728,7 @@
   }
 
   // ─── Startup ───
-  // Show identity section in mock mode on load
-  if (currentMode === 'mock') {
-    var identitySection = document.getElementById('identity-section');
-    if (identitySection) identitySection.style.display = '';
-    renderIdentityPanel();
-  }
-  // Load available pools (visible in both modes via lending dashboard tab)
+  // Load available pools
   loadAvailablePools();
   // Restore lending session from localStorage
   tryRestoreSession();

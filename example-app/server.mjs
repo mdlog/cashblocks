@@ -15,9 +15,9 @@ import { runGovernanceChipnetScenario } from './governance-engine-chipnet.mjs';
 import { runYieldVaultChipnetScenario } from './yield-vault-engine-chipnet.mjs';
 import { runInsuranceChipnetScenario } from './insurance-engine-chipnet.mjs';
 import {
-  keysExist, loadKeys, generateAndSaveKeys, getOwnerBalance,
-  resetProvider, importWif, importKeysJson, deleteKeys, FAUCET_URL,
-  generateKeypair, uint8ToHex,
+  getOwnerBalance,
+  resetProvider, FAUCET_URL,
+  generateKeypair,
 } from './chipnet-helpers.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -30,70 +30,17 @@ app.use(express.static(join(__dirname, 'public')));
 const jsonBigInt = (_, v) => typeof v === 'bigint' ? v.toString() : v;
 
 const engines = {
-  lending: runLendingScenario,
-  governance: runGovernanceScenario,
-  'yield-vault': runYieldVaultScenario,
-  insurance: runInsuranceScenario,
-};
-
-const chipnetEngines = {
   lending: runLendingChipnetScenario,
   governance: runGovernanceChipnetScenario,
   'yield-vault': runYieldVaultChipnetScenario,
   insurance: runInsuranceChipnetScenario,
 };
 
-// ─── Mock Scenario SSE Endpoint ───
-
-// POST /api/scenario/:name — Run any mock scenario with SSE streaming
-app.post('/api/scenario/:name', async (req, res) => {
-  const engine = engines[req.params.name];
-  if (!engine) {
-    return res.status(404).json({ error: `Unknown scenario: ${req.params.name}` });
-  }
-
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-  });
-
-  try {
-    const raw = req.body || {};
-    const config = {};
-    for (const [key, val] of Object.entries(raw)) {
-      if (typeof val === 'string' && /^\d+$/.test(val)) {
-        config[key] = BigInt(val);
-      } else if (typeof val === 'number') {
-        config[key] = val;
-      }
-    }
-
-    const result = await engine(config, (step) => {
-      res.write(`data: ${JSON.stringify(step, jsonBigInt)}\n\n`);
-    });
-
-    res.write(`event: done\ndata: ${JSON.stringify(
-      JSON.parse(JSON.stringify(result, jsonBigInt))
-    )}\n\n`);
-  } catch (err) {
-    res.write(`event: error\ndata: ${JSON.stringify({ error: err.message })}\n\n`);
-  } finally {
-    res.end();
-  }
-});
-
-// ─── Legacy mock endpoint (backwards-compat) ───
-app.post('/api/run-stream', async (req, res) => {
-  req.params = { name: 'lending' };
-  app.handle(req, res);
-});
-
 // ─── Chipnet Scenario SSE Endpoint ───
 
-// POST /api/chipnet/scenario/:name — Run any chipnet scenario with SSE streaming
-app.post('/api/chipnet/scenario/:name', async (req, res) => {
-  const engine = chipnetEngines[req.params.name];
+// POST /api/scenario/:name — Run chipnet scenario with SSE streaming
+app.post('/api/scenario/:name', async (req, res) => {
+  const engine = engines[req.params.name];
   if (!engine) {
     return res.status(404).json({ error: `Unknown chipnet scenario: ${req.params.name}` });
   }
@@ -156,67 +103,7 @@ app.post('/api/chipnet/balance-check', async (req, res) => {
   }
 });
 
-// Legacy: status from server-side .keys.json (backward compat)
-app.get('/api/chipnet/status', async (req, res) => {
-  try {
-    const hasKeys = keysExist();
-    if (!hasKeys) {
-      return res.json({ hasKeys: false, faucetUrl: FAUCET_URL });
-    }
-    const keys = loadKeys();
-    const { balance, utxoCount } = await getOwnerBalance(keys.owner.address);
-    res.json(JSON.parse(JSON.stringify({
-      hasKeys: true,
-      owner: keys.owner.address,
-      recipient: keys.recipient.address,
-      oracle: keys.oracle.address,
-      balance, utxoCount,
-      faucetUrl: FAUCET_URL,
-    }, jsonBigInt)));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Legacy: balance from server-side .keys.json (backward compat)
-app.get('/api/chipnet/balance', async (req, res) => {
-  try {
-    if (!keysExist()) {
-      return res.status(400).json({ error: 'No keys generated yet.' });
-    }
-    const keys = loadKeys();
-    const { balance, utxoCount } = await getOwnerBalance(keys.owner.address);
-    res.json(JSON.parse(JSON.stringify({ balance, utxoCount }, jsonBigInt)));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ─── Legacy chipnet stream (backwards-compat) ───
-app.post('/api/chipnet/run-stream', async (req, res) => {
-  req.params = { name: 'lending' };
-  // Forward to the unified chipnet endpoint handler
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-  });
-  try {
-    resetProvider();
-    const result = await runLendingChipnetScenario((step) => {
-      res.write(`data: ${JSON.stringify(step, jsonBigInt)}\n\n`);
-    });
-    res.write(`event: done\ndata: ${JSON.stringify(
-      JSON.parse(JSON.stringify(result, jsonBigInt))
-    )}\n\n`);
-  } catch (err) {
-    res.write(`event: error\ndata: ${JSON.stringify({ error: err.message })}\n\n`);
-  } finally {
-    res.end();
-  }
-});
-
-// ─── Key Generation (for mock identity) ───
+// ─── Key Generation ───
 
 app.post('/api/keys/generate', (req, res) => {
   try {
@@ -238,7 +125,7 @@ app.post('/api/keys/generate', (req, res) => {
 app.post('/api/lending/init', async (req, res) => {
   try {
     const raw = req.body || {};
-    const mode = raw.mode === 'chipnet' ? 'chipnet' : 'mock';
+    const mode = 'chipnet';
     const config = {};
     if (raw.poolBalance) config.poolBalance = BigInt(raw.poolBalance);
     if (raw.maxLoan) config.maxLoan = BigInt(raw.maxLoan);

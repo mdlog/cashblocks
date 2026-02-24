@@ -35,8 +35,7 @@
       </nav>
       <div class="header-right">
         <div class="mode-toggle">
-          <button class="mode-btn active" data-mode="mock">Mock</button>
-          <button class="mode-btn" data-mode="chipnet">Chipnet</button>
+          <button class="mode-btn active" data-mode="chipnet">Chipnet</button>
         </div>
         <span class="badge badge-net" id="badge-net">
           <span class="badge-dot"></span>
@@ -166,46 +165,6 @@
     </div>
   </section>
 
-  <!-- ── Identity Section (Mock Mode) ── -->
-  <section class="identity-section" id="identity-section" style="display:none">
-    <div class="identity-inner">
-      <div class="identity-header">
-        <h3 class="identity-title">Mock Identity</h3>
-        <span class="badge badge-mock">
-          <span class="badge-dot mock-dot"></span>
-          Local Keys
-        </span>
-      </div>
-      <div class="identity-grid" style="grid-template-columns:1fr">
-        <!-- Your Identity Card -->
-        <div class="wallet-card" id="identity-card">
-          <div class="wallet-card-label">Your Identity</div>
-          <div id="identity-no-keys">
-            <p class="wallet-hint">Generate or import a local identity for multi-user testing</p>
-            <div class="wallet-actions">
-              <button type="button" class="btn-primary btn-sm" id="btn-generate-identity">Generate Identity</button>
-              <button type="button" class="btn-ghost btn-sm" id="btn-import-identity">Import Keys</button>
-              <input type="file" id="import-identity-file" accept=".json" style="display:none">
-            </div>
-          </div>
-          <div id="identity-has-keys" style="display:none">
-            <div class="wallet-addr-row">
-              <span class="wallet-addr-label">Address</span>
-              <span class="wallet-addr-value" id="identity-address"></span>
-            </div>
-            <div class="wallet-addr-row">
-              <span class="wallet-addr-label">Public Key</span>
-              <span class="wallet-addr-value" id="identity-pubkey"></span>
-            </div>
-            <div class="wallet-actions" style="margin-top:0.75rem">
-              <button type="button" class="btn-ghost btn-sm" id="btn-download-identity">Download Keys</button>
-              <button type="button" class="btn-ghost btn-sm btn-danger" id="btn-clear-identity">Clear Identity</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ── Scenario Section ── -->
   <section class="scenarios-section" id="scenarios">
@@ -295,7 +254,7 @@
               <div id="lending-loading-overlay" class="loading-overlay" style="display:none">
                 <div class="loading-ring"></div>
                 <div class="loading-text">Initializing Pool</div>
-                <div class="loading-subtext" id="loading-subtext">Deploying mock contracts...</div>
+                <div class="loading-subtext" id="loading-subtext">Deploying contracts on chipnet...</div>
               </div>
               <div class="lending-init-form" id="lending-init-form">
                 <div class="init-form-title">Initialize Lending Pool</div>

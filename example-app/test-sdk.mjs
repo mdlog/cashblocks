@@ -1,7 +1,7 @@
 /**
  * CashBlocks SDK Verification Test
  *
- * Tests all 4 primitives + composer + all 4 DeFi engines from the npm package.
+ * Tests all 4 primitives + composer from the npm package.
  * Run: node test-sdk.mjs
  */
 import {
@@ -26,11 +26,6 @@ import {
   hash160,
   sha256,
 } from '@bitauth/libauth';
-
-import { runLendingScenario } from './lending-engine.mjs';
-import { runGovernanceScenario } from './governance-engine.mjs';
-import { runYieldVaultScenario } from './yield-vault-engine.mjs';
-import { runInsuranceScenario } from './insurance-engine.mjs';
 
 let passed = 0;
 let failed = 0;
@@ -196,39 +191,27 @@ test('createProvider mock', () => {
   assert(p !== undefined);
 });
 
-// --- 9. DeFi Scenario Engines ---
-console.log('\n9. DeFi Scenario Engines');
+// --- 9. Chipnet Engine Imports ---
+console.log('\n9. Chipnet DeFi Engines (import check)');
 
-await testAsync('Lending engine runs full scenario', async () => {
-  const steps = [];
-  const result = await runLendingScenario({}, s => steps.push(s));
-  assert(result.summary !== undefined, 'Missing summary');
-  assert(steps.length >= 7, `Expected >= 7 steps, got ${steps.length}`);
-  assert(parseInt(result.summary['Attacks blocked'], 10) >= 4, 'Expected >= 4 blocked attacks');
+await testAsync('Lending chipnet engine exports runLendingChipnetScenario', async () => {
+  const { runLendingChipnetScenario } = await import('./lending-engine-chipnet.mjs');
+  assert(typeof runLendingChipnetScenario === 'function');
 });
 
-await testAsync('Governance engine runs full scenario', async () => {
-  const steps = [];
-  const result = await runGovernanceScenario({}, s => steps.push(s));
-  assert(result.summary !== undefined, 'Missing summary');
-  assert(steps.length >= 7, `Expected >= 7 steps, got ${steps.length}`);
-  assert(parseInt(result.summary['Attacks blocked'], 10) >= 4, 'Expected >= 4 blocked attacks');
+await testAsync('Governance chipnet engine exports runGovernanceChipnetScenario', async () => {
+  const { runGovernanceChipnetScenario } = await import('./governance-engine-chipnet.mjs');
+  assert(typeof runGovernanceChipnetScenario === 'function');
 });
 
-await testAsync('Yield Vault engine runs full scenario', async () => {
-  const steps = [];
-  const result = await runYieldVaultScenario({}, s => steps.push(s));
-  assert(result.summary !== undefined, 'Missing summary');
-  assert(steps.length >= 6, `Expected >= 6 steps, got ${steps.length}`);
-  assert(parseInt(result.summary['Attacks blocked'], 10) >= 3, 'Expected >= 3 blocked attacks');
+await testAsync('Yield Vault chipnet engine exports runYieldVaultChipnetScenario', async () => {
+  const { runYieldVaultChipnetScenario } = await import('./yield-vault-engine-chipnet.mjs');
+  assert(typeof runYieldVaultChipnetScenario === 'function');
 });
 
-await testAsync('Insurance engine runs full scenario', async () => {
-  const steps = [];
-  const result = await runInsuranceScenario({}, s => steps.push(s));
-  assert(result.summary !== undefined, 'Missing summary');
-  assert(steps.length >= 7, `Expected >= 7 steps, got ${steps.length}`);
-  assert(parseInt(result.summary['Attacks blocked'], 10) >= 4, 'Expected >= 4 blocked attacks');
+await testAsync('Insurance chipnet engine exports runInsuranceChipnetScenario', async () => {
+  const { runInsuranceChipnetScenario } = await import('./insurance-engine-chipnet.mjs');
+  assert(typeof runInsuranceChipnetScenario === 'function');
 });
 
 // --- Result ---

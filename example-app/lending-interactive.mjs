@@ -1,6 +1,6 @@
 /**
  * Interactive Lending Pool — Session-based backend for real DeFi interactions
- * Supports both Mock and Chipnet modes with server-side pool state.
+ * Chipnet mode with server-side pool state.
  */
 import {
   VaultPrimitive,
@@ -12,18 +12,12 @@ import {
 } from 'cashblocks';
 
 import {
-  MockNetworkProvider,
-  randomUtxo,
   SignatureTemplate,
 } from 'cashscript';
 
 import {
   secp256k1,
-  generatePrivateKey,
-  hash160,
   sha256,
-  encodeCashAddress,
-  CashAddressType,
 } from '@bitauth/libauth';
 
 import {
@@ -36,24 +30,12 @@ import {
 const sessions = new Map();
 let sessionCounter = 0;
 
-function generateKeypair(label) {
-  const privKey = generatePrivateKey();
-  const pubKey = secp256k1.derivePublicKeyCompressed(privKey);
-  const pkh = hash160(pubKey);
-  const address = encodeCashAddress({
-    payload: pkh,
-    prefix: 'bchtest',
-    type: CashAddressType.p2pkh,
-  }).address;
-  return { label, privKey, pubKey, pkh, address };
-}
-
 // ─── Initialize Pool ───
 
-export async function initializePool(config = {}, mode = 'mock', browserKeys = null) {
+export async function initializePool(config = {}, mode = 'chipnet', browserKeys = null) {
   const {
-    poolBalance = mode === 'chipnet' ? 50_000n : 5_000_000n,
-    maxLoan     = mode === 'chipnet' ? 10_000n : 500_000n,
+    poolBalance = 50_000n,
+    maxLoan     = 10_000n,
     minCreditScore = 50n,
     ownerLabel = 'Anonymous',
   } = config;
@@ -61,72 +43,7 @@ export async function initializePool(config = {}, mode = 'mock', browserKeys = n
   const sessionId = `pool-${++sessionCounter}-${Date.now()}`;
   const DOMAIN = new Uint8Array([0x43, 0x52, 0x45, 0x44]); // "CRED"
 
-  if (mode === 'mock') {
-    return initMockPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel });
-  } else {
-    return initChipnetPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel }, browserKeys);
-  }
-}
-
-async function initMockPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel }) {
-  const owner = generateKeypair('Pool Owner');
-  const recipient = generateKeypair('Borrower');
-  const oracle = generateKeypair('Oracle');
-
-  const provider = new MockNetworkProvider();
-
-  const baseLocktime = 1_700_100_000;
-  const pool = new VaultPrimitive({
-    ownerPk: owner.pubKey,
-    spendLimit: maxLoan,
-    whitelistHash: recipient.pkh,
-  }, provider);
-
-  const schedule = new TimeStatePrimitive({
-    ownerPk: owner.pubKey,
-    phase1Time: BigInt(baseLocktime),
-    phase2Time: BigInt(baseLocktime + 100_000),
-  }, provider);
-
-  const credit = new OracleProofPrimitive({
-    oraclePk: oracle.pubKey,
-    domainSeparator: DOMAIN,
-    expiryDuration: 7200n,
-  }, provider);
-
-  // Fund the pool
-  let currentUtxo = randomUtxo({ satoshis: poolBalance });
-  provider.addUtxo(pool.address, currentUtxo);
-
-  const session = {
-    id: sessionId,
-    mode: 'mock',
-    ownerLabel,
-    createdAt: new Date().toISOString(),
-    config: { poolBalance, maxLoan, minCreditScore },
-    currentBalance: poolBalance,
-    txCount: 0,
-    nonceCounter: 0,
-    history: [],
-    // Internal
-    provider,
-    pool,
-    schedule,
-    credit,
-    currentUtxo,
-    owner,
-    recipient,
-    oracle,
-    DOMAIN,
-    baseLocktime,
-  };
-
-  sessions.set(sessionId, session);
-
-  return {
-    sessionId,
-    dashboard: buildDashboard(session),
-  };
+  return initChipnetPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel }, browserKeys);
 }
 
 async function initChipnetPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel }, browserKeys = null) {
@@ -254,11 +171,7 @@ export async function requestLoan(sessionId, { amount, creditScore, borrowerLabe
   }
 
   try {
-    if (session.mode === 'mock') {
-      return await executeMockLoan(session, amount, creditScore, borrowerLabel, loanRecipient);
-    } else {
-      return await executeChipnetLoan(session, amount, creditScore, borrowerLabel, loanRecipient);
-    }
+    return await executeChipnetLoan(session, amount, creditScore, borrowerLabel, loanRecipient);
   } catch (err) {
     const entry = {
       amount: amount.toString(),
@@ -275,66 +188,6 @@ export async function requestLoan(sessionId, { amount, creditScore, borrowerLabe
       poolState: buildDashboard(session),
     };
   }
-}
-
-async function executeMockLoan(session, amount, creditScore, borrowerLabel, loanRecipient) {
-  const { pool, schedule, credit, provider, owner, oracle, DOMAIN, baseLocktime } = session;
-
-  session.nonceCounter++;
-  const nonce = BigInt(session.nonceCounter);
-  const timestamp = BigInt(baseLocktime + 300 + session.nonceCounter * 100);
-
-  // Sign oracle message
-  const payload = intToBytes4LE(creditScore);
-  const msg = encodeOracleMessage(DOMAIN, timestamp, nonce, payload);
-  const msgHash = sha256.hash(msg);
-  const oSig = secp256k1.signMessageHashSchnorr(oracle.privKey, msgHash);
-
-  // Create helper UTXOs
-  const timerUtxo = randomUtxo({ satoshis: 1_000n });
-  const oracleUtxo = randomUtxo({ satoshis: 1_000n });
-  provider.addUtxo(schedule.address, timerUtxo);
-  provider.addUtxo(credit.address, oracleUtxo);
-
-  const lenderSig = new SignatureTemplate(owner.privKey);
-  const newBalance = session.currentUtxo.satoshis - amount;
-
-  const composer = new TransactionComposer(provider);
-  composer
-    .addInput(session.currentUtxo, pool.contract.unlock.composableSpend(lenderSig, amount, 0n))
-    .addInput(timerUtxo, schedule.contract.unlock.composableCheck(lenderSig, 1n))
-    .addInput(oracleUtxo, credit.contract.unlock.composableVerify(oSig, msg))
-    .addOutput(pool.address, newBalance)
-    .addOutput(loanRecipient, amount)
-    .setLocktime(Number(timestamp) + 10);
-
-  const tx = await composer.send();
-
-  // Update session state
-  session.currentBalance = newBalance;
-  session.txCount++;
-
-  // Create new continuation UTXO
-  const newUtxo = randomUtxo({ satoshis: newBalance });
-  provider.addUtxo(pool.address, newUtxo);
-  session.currentUtxo = newUtxo;
-
-  const entry = {
-    txid: tx.txid,
-    amount: amount.toString(),
-    creditScore: creditScore.toString(),
-    borrowerLabel,
-    recipientAddress: loanRecipient,
-    status: 'success',
-    timestamp: new Date().toISOString(),
-  };
-  session.history.push(entry);
-
-  return {
-    success: true,
-    txid: tx.txid,
-    poolState: buildDashboard(session),
-  };
 }
 
 async function executeChipnetLoan(session, amount, creditScore, borrowerLabel, loanRecipient) {
