@@ -1,7 +1,8 @@
 import { TransactionBuilder } from 'cashscript';
 import type { NetworkProvider, Utxo, Unlocker, TokenDetails } from 'cashscript';
+import { CashBlocksError } from '../utils/errors.js';
 
-interface ComposerOutput {
+export interface ComposerOutput {
   to: string | Uint8Array;
   amount: bigint;
   token?: TokenDetails;
@@ -32,6 +33,21 @@ export class TransactionComposer {
   setLocktime(locktime: number): this {
     this.locktimeValue = locktime;
     return this;
+  }
+
+  validate(): void {
+    if (this.inputs.length === 0) {
+      throw new CashBlocksError(
+        'TransactionComposer requires at least one input',
+        'VALIDATION_FAILED',
+      );
+    }
+    if (this.outputs.length === 0) {
+      throw new CashBlocksError(
+        'TransactionComposer requires at least one output',
+        'VALIDATION_FAILED',
+      );
+    }
   }
 
   build(): TransactionBuilder {
@@ -73,17 +89,33 @@ export class TransactionComposer {
   }
 
   async send() {
+    this.validate();
     const builder = this.build();
     if (this.debugEnabled) this.logDetails();
-    return builder.send();
+    try {
+      return await builder.send();
+    } catch (error) {
+      throw new CashBlocksError(
+        `Transaction send failed: ${error instanceof Error ? error.message : String(error)}`,
+        'COMPOSER_FAILED',
+      );
+    }
   }
 
   async sendDirect() {
+    this.validate();
     const builder = this.build();
     if (this.debugEnabled) this.logDetails();
-    const txHex = builder.build();
-    const txid = await this.provider.sendRawTransaction(txHex);
-    return { txid };
+    try {
+      const txHex = builder.build();
+      const txid = await this.provider.sendRawTransaction(txHex);
+      return { txid };
+    } catch (error) {
+      throw new CashBlocksError(
+        `Transaction sendDirect failed: ${error instanceof Error ? error.message : String(error)}`,
+        'COMPOSER_FAILED',
+      );
+    }
   }
 
   debug() {

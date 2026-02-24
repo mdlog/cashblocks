@@ -1,6 +1,7 @@
 import { Contract, SignatureTemplate } from 'cashscript';
 import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { TokenGateParams } from '../utils/types.js';
+import { validateCategory, validatePositiveBigInt } from '../utils/validation.js';
 import defaultArtifact from '../artifacts/token-gate.json' with { type: 'json' };
 
 export class TokenGatePrimitive {
@@ -15,6 +16,8 @@ export class TokenGatePrimitive {
    * Use `categoryToVMBytes(hexString)` to convert from display format.
    */
   constructor(params: TokenGateParams, provider: NetworkProvider, artifact?: Artifact) {
+    validateCategory(params.requiredCategory, 'requiredCategory');
+    validatePositiveBigInt(params.minTokenAmount, 'minTokenAmount');
     const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
     this.contract = new Contract(art, [

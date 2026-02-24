@@ -1,6 +1,7 @@
 import { Contract, SignatureTemplate } from 'cashscript';
 import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { VaultParams } from '../utils/types.js';
+import { validatePublicKey, validateHash160, validatePositiveBigInt } from '../utils/validation.js';
 import defaultArtifact from '../artifacts/vault.json' with { type: 'json' };
 
 export class VaultPrimitive {
@@ -8,6 +9,9 @@ export class VaultPrimitive {
   private params: VaultParams;
 
   constructor(params: VaultParams, provider: NetworkProvider, artifact?: Artifact) {
+    validatePublicKey(params.ownerPk, 'ownerPk');
+    validatePositiveBigInt(params.spendLimit, 'spendLimit');
+    validateHash160(params.whitelistHash, 'whitelistHash');
     const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
     this.contract = new Contract(art, [

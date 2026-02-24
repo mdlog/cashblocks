@@ -2,6 +2,8 @@ import { Contract, SignatureTemplate } from 'cashscript';
 import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { TimeStateParams } from '../utils/types.js';
 import { TimePhase } from '../utils/types.js';
+import { validatePublicKey, validatePositiveBigInt } from '../utils/validation.js';
+import { CashBlocksError } from '../utils/errors.js';
 import defaultArtifact from '../artifacts/time-state.json' with { type: 'json' };
 
 export class TimeStatePrimitive {
@@ -9,6 +11,15 @@ export class TimeStatePrimitive {
   private params: TimeStateParams;
 
   constructor(params: TimeStateParams, provider: NetworkProvider, artifact?: Artifact) {
+    validatePublicKey(params.ownerPk, 'ownerPk');
+    validatePositiveBigInt(params.phase1Time, 'phase1Time');
+    validatePositiveBigInt(params.phase2Time, 'phase2Time');
+    if (params.phase2Time <= params.phase1Time) {
+      throw new CashBlocksError(
+        `phase2Time (${params.phase2Time}) must be greater than phase1Time (${params.phase1Time})`,
+        'INVALID_PARAM',
+      );
+    }
     const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
     this.contract = new Contract(art, [

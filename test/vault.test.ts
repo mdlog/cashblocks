@@ -14,6 +14,8 @@ import {
   encodeCashAddress,
   CashAddressType,
 } from '@bitauth/libauth';
+import { VaultPrimitive } from '../src/primitives/vault.js';
+import { CashBlocksError } from '../src/utils/errors.js';
 
 function makeKeypair() {
   const privKey = generatePrivateKey();
@@ -245,5 +247,37 @@ describe('Vault Primitive', () => {
 
     const tx = await builder.send();
     expect(tx.txid).toBeDefined();
+  });
+});
+
+describe('VaultPrimitive validation', () => {
+  const provider = new MockNetworkProvider();
+
+  it('rejects ownerPk that is not 33 bytes', () => {
+    expect(() => new VaultPrimitive(
+      { ownerPk: new Uint8Array(32), spendLimit: 10_000n, whitelistHash: new Uint8Array(20) },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects zero spendLimit', () => {
+    expect(() => new VaultPrimitive(
+      { ownerPk: new Uint8Array(33), spendLimit: 0n, whitelistHash: new Uint8Array(20) },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects negative spendLimit', () => {
+    expect(() => new VaultPrimitive(
+      { ownerPk: new Uint8Array(33), spendLimit: -1n, whitelistHash: new Uint8Array(20) },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects whitelistHash that is not 20 bytes', () => {
+    expect(() => new VaultPrimitive(
+      { ownerPk: new Uint8Array(33), spendLimit: 10_000n, whitelistHash: new Uint8Array(32) },
+      provider,
+    )).toThrow(CashBlocksError);
   });
 });

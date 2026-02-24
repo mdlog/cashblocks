@@ -17,6 +17,7 @@ import {
 } from '@bitauth/libauth';
 import { encodeOracleMessage, intToBytes4LE } from '../src/utils/encoding.js';
 import { TransactionComposer } from '../src/composer/transaction-composer.js';
+import { CashBlocksError } from '../src/utils/errors.js';
 
 function makeKeypair() {
   const privKey = generatePrivateKey();
@@ -201,5 +202,42 @@ describe('Transaction Composer', () => {
       .setLocktime(PHASE1_TIME + 100);
 
     await expect(composer.send()).rejects.toThrow();
+  });
+});
+
+describe('TransactionComposer validation', () => {
+  const vaultArtifact = compileFile('./contracts/vault.cash');
+  const owner2 = makeKeypair();
+  const recipient2 = makeKeypair();
+  const recipientInfo2 = makeAddress(recipient2.pubKey);
+
+  it('validate() rejects empty inputs', () => {
+    const provider = new MockNetworkProvider();
+    const composer = new TransactionComposer(provider);
+    composer.addOutput(recipientInfo2.address, 1000n);
+    expect(() => composer.validate()).toThrow(CashBlocksError);
+  });
+
+  it('validate() rejects empty outputs', () => {
+    const provider = new MockNetworkProvider();
+    const vaultContract = new Contract(
+      vaultArtifact,
+      [owner2.pubKey, 50_000n, recipientInfo2.pkh],
+      { provider },
+    );
+    const utxo = randomUtxo({ satoshis: 10_000n });
+    provider.addUtxo(vaultContract.address, utxo);
+    const sig = new SignatureTemplate(owner2.privKey);
+
+    const composer = new TransactionComposer(provider);
+    composer.addInput(utxo, vaultContract.unlock.fullSpend(sig));
+    expect(() => composer.validate()).toThrow(CashBlocksError);
+  });
+
+  it('send() rejects when no inputs', async () => {
+    const provider = new MockNetworkProvider();
+    const composer = new TransactionComposer(provider);
+    composer.addOutput(recipientInfo2.address, 1000n);
+    await expect(composer.send()).rejects.toThrow(CashBlocksError);
   });
 });

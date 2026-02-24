@@ -20,7 +20,7 @@ git clone https://github.com/mdlog/cashblocks.git
 cd cashblocks
 npm install
 npm run compile:contracts
-npm test    # 42 tests
+npm test    # 100 tests
 ```
 
 ## Primitives
@@ -165,6 +165,9 @@ src/
     types.ts              # Shared interfaces & enums
     encoding.ts           # Oracle message encoding
     network.ts            # Provider factory
+    errors.ts             # CashBlocksError class
+    validation.ts         # Input validation helpers
+    helpers.ts            # Utility functions (address, domain, nonce, etc.)
   index.ts                # Barrel export
 scripts/
   generate-keys.ts        # Generate owner/recipient/oracle keypairs
@@ -184,11 +187,12 @@ examples/
 example-app/              # Standalone DeFi protocol suite (4 scenarios)
 web/                      # Express web demo server (port 5555)
 test/
-  vault.test.ts           # 12 tests
-  time-state.test.ts      # 10 tests
-  oracle-proof.test.ts    # 8 tests
-  token-gate.test.ts      # 8 tests (CashTokens)
-  composer.test.ts        # 4 tests
+  vault.test.ts           # 16 tests
+  time-state.test.ts      # 14 tests
+  oracle-proof.test.ts    # 13 tests
+  token-gate.test.ts      # 10 tests (CashTokens)
+  composer.test.ts        # 7 tests
+  validation.test.ts      # 40 tests (validation + helpers)
 ```
 
 ## Examples
@@ -277,7 +281,7 @@ npm run dev         # Start web dashboard (port 3060)
 ## Testing
 
 ```bash
-# Unit tests (42 tests, MockNetworkProvider)
+# Unit tests (100 tests, MockNetworkProvider)
 npm test
 
 # Run examples (MockNetworkProvider, no BCH needed)
@@ -308,6 +312,66 @@ npm run test:chipnet
 | Token-Gated DAO | Vault + Time-State + Oracle + TokenGate | Governance tokens required to execute proposals (CashTokens) |
 | Salary Distribution | Time-State | Phase-based payment unlocking |
 | Price-Gated Spending | Oracle (payload constraint) | Only spend when oracle price meets threshold |
+
+## Security Considerations
+
+**This SDK has NOT been independently audited.** Use at your own risk, especially on mainnet.
+
+- **Private key handling**: The SDK accepts raw private keys as `Uint8Array` for signing. Never log, transmit, or persist private keys. The SDK does not store private keys.
+- **Oracle trust model**: `OracleProofPrimitive` trusts the oracle identified by `oraclePk`. A compromised oracle key can sign arbitrary messages. Use multiple oracles or threshold schemes for high-value applications.
+- **Nonce reuse**: Oracle messages include a nonce field. The on-chain contract requires `nonce > 0` but does NOT enforce nonce uniqueness — replay detection is an application-layer concern. See [Oracle Nonce Management](#oracle-nonce-management).
+- **Dust limit**: Bitcoin Cash enforces a dust limit of 546 satoshis. Outputs below this are rejected. Use the `DUST_LIMIT` constant from the SDK.
+- **Fee estimation**: The SDK contracts use a hardcoded fee of 1000 satoshis (`HARDCODED_FEE`). This is sufficient for simple transactions but may be too low for complex multi-input transactions. Production applications should implement proper fee estimation.
+- **Covenant continuation**: When using `partialSpend` or `spendRestricted`, the contract enforces that remaining funds are sent back to the same contract address. Ensure your transaction includes the continuation output at the correct index.
+- **Input validation**: v0.3.0 validates all constructor parameters (key lengths, hash lengths, positive amounts). Invalid parameters throw `CashBlocksError` with descriptive messages.
+
+## Mainnet Readiness
+
+### Current Status: **Not Production Ready**
+
+CashBlocks v0.3.0 is suitable for chipnet testing and prototyping.
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Smart Contracts | Functional | 4 contracts compiled and tested on chipnet |
+| Input Validation | v0.3.0 | All constructor params validated with descriptive errors |
+| Error Handling | v0.3.0 | `CashBlocksError` with error codes |
+| Fee Estimation | Hardcoded | 1000 sats fixed fee — insufficient for production |
+| Security Audit | **Not Done** | No independent audit has been performed |
+| UTXO Management | Basic | No automatic UTXO selection or consolidation |
+| Reorg Handling | None | No built-in chain reorganization detection |
+
+### Before Mainnet Deployment
+
+1. Replace hardcoded fees with dynamic fee estimation based on transaction size
+2. Obtain a security audit of both the CashScript contracts and the TypeScript SDK
+3. Implement UTXO management (automatic coin selection, dust consolidation)
+4. Add retry logic for network failures and mempool conflicts
+5. Test with real value on chipnet extensively before mainnet
+
+## Oracle Nonce Management
+
+Oracle messages use the format `[domain 4B][timestamp 4B][nonce 4B][payload NB]`. The nonce field prevents accidental message collision and supports replay-detection at the application layer.
+
+### Generating Nonces
+
+```typescript
+import { generateNonce, domainFromString, encodeOracleMessage } from 'cashblocks';
+
+const nonce = generateNonce(); // Combines timestamp + random, fits in 4 bytes LE
+const domain = domainFromString('VOTE'); // "VOTE" → Uint8Array([0x56, 0x4f, 0x54, 0x45])
+
+const timestamp = BigInt(Math.floor(Date.now() / 1000));
+const payload = new Uint8Array([0x01]); // vote=YES
+const message = encodeOracleMessage(domain, timestamp, nonce, payload);
+```
+
+### Best Practices
+
+- **Use unique nonces** for each oracle message. `generateNonce()` combines a timestamp component with randomness.
+- **Nonce size constraint**: Nonces are encoded as 4-byte little-endian integers. Range: `1` to `4,294,967,295`. `generateNonce()` handles this automatically.
+- **Nonce tracking (optional)**: For replay detection, maintain a set of used nonces per domain. The on-chain contract does NOT enforce nonce uniqueness.
+- **Zero nonce is rejected**: The oracle contract requires `nonce > 0`. Always use `generateNonce()` or ensure the nonce is positive.
 
 ## License
 

@@ -15,6 +15,8 @@ import {
   encodeCashAddress,
   CashAddressType,
 } from '@bitauth/libauth';
+import { TokenGatePrimitive } from '../src/primitives/token-gate.js';
+import { CashBlocksError } from '../src/utils/errors.js';
 
 function makeKeypair() {
   const privKey = generatePrivateKey();
@@ -190,5 +192,23 @@ describe('TokenGate Primitive', () => {
     });
 
     await expect(builder.send()).rejects.toThrow();
+  });
+});
+
+describe('TokenGatePrimitive validation', () => {
+  const provider = new MockNetworkProvider();
+
+  it('rejects requiredCategory that is not 32 bytes', () => {
+    expect(() => new TokenGatePrimitive(
+      { requiredCategory: new Uint8Array(20), minTokenAmount: 100n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects zero minTokenAmount', () => {
+    expect(() => new TokenGatePrimitive(
+      { requiredCategory: new Uint8Array(32), minTokenAmount: 0n },
+      provider,
+    )).toThrow(CashBlocksError);
   });
 });

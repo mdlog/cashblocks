@@ -1,6 +1,6 @@
 {
   "name": "cashblocks",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "CashBlocks — Composable UTXO building blocks for Bitcoin Cash. Vault, Time-State, Oracle Proof, and Token Gate primitives with CashTokens support.",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "import": "./dist/primitives/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./composer": {
+      "types": "./dist/composer/transaction-composer.d.ts",
+      "import": "./dist/composer/transaction-composer.js"
     }
   },
   "files": [

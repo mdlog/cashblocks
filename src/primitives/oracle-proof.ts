@@ -2,6 +2,7 @@ import { Contract, SignatureTemplate } from 'cashscript';
 import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { OracleProofParams } from '../utils/types.js';
 import { encodeOracleMessage } from '../utils/encoding.js';
+import { validatePublicKey, validateDomainSeparator, validatePositiveBigInt } from '../utils/validation.js';
 import defaultArtifact from '../artifacts/oracle-proof.json' with { type: 'json' };
 
 export class OracleProofPrimitive {
@@ -9,6 +10,9 @@ export class OracleProofPrimitive {
   private params: OracleProofParams;
 
   constructor(params: OracleProofParams, provider: NetworkProvider, artifact?: Artifact) {
+    validatePublicKey(params.oraclePk, 'oraclePk');
+    validateDomainSeparator(params.domainSeparator);
+    validatePositiveBigInt(params.expiryDuration, 'expiryDuration');
     const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
     this.contract = new Contract(art, [

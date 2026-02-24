@@ -14,6 +14,8 @@ import {
   encodeCashAddress,
   CashAddressType,
 } from '@bitauth/libauth';
+import { TimeStatePrimitive } from '../src/primitives/time-state.js';
+import { CashBlocksError } from '../src/utils/errors.js';
 
 function makeKeypair() {
   const privKey = generatePrivateKey();
@@ -215,5 +217,37 @@ describe('Time-State Primitive', () => {
     builder.setLocktime(PHASE1_TIME - 1000);
 
     await expect(builder.send()).rejects.toThrow();
+  });
+});
+
+describe('TimeStatePrimitive validation', () => {
+  const provider = new MockNetworkProvider();
+
+  it('rejects phase2Time equal to phase1Time', () => {
+    expect(() => new TimeStatePrimitive(
+      { ownerPk: new Uint8Array(33), phase1Time: 1000n, phase2Time: 1000n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects phase2Time less than phase1Time', () => {
+    expect(() => new TimeStatePrimitive(
+      { ownerPk: new Uint8Array(33), phase1Time: 2000n, phase2Time: 1000n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects zero phase1Time', () => {
+    expect(() => new TimeStatePrimitive(
+      { ownerPk: new Uint8Array(33), phase1Time: 0n, phase2Time: 1000n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects ownerPk that is not 33 bytes', () => {
+    expect(() => new TimeStatePrimitive(
+      { ownerPk: new Uint8Array(65), phase1Time: 1000n, phase2Time: 2000n },
+      provider,
+    )).toThrow(CashBlocksError);
   });
 });

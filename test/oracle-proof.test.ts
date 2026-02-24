@@ -14,7 +14,9 @@ import {
   encodeCashAddress,
   CashAddressType,
 } from '@bitauth/libauth';
-import { encodeOracleMessage, intToBytes4LE } from '../src/utils/encoding.js';
+import { encodeOracleMessage, intToBytes4LE, decodeOracleMessage } from '../src/utils/encoding.js';
+import { OracleProofPrimitive } from '../src/primitives/oracle-proof.js';
+import { CashBlocksError } from '../src/utils/errors.js';
 
 function makeKeypair() {
   const privKey = generatePrivateKey();
@@ -254,5 +256,57 @@ describe('Oracle Proof Primitive', () => {
     builder.setLocktime(Number(TIMESTAMP) + 100);
 
     await expect(builder.send()).rejects.toThrow();
+  });
+});
+
+describe('OracleProofPrimitive validation', () => {
+  const provider = new MockNetworkProvider();
+
+  it('rejects oraclePk that is not 33 bytes', () => {
+    expect(() => new OracleProofPrimitive(
+      { oraclePk: new Uint8Array(32), domainSeparator: new Uint8Array(4), expiryDuration: 3600n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects domainSeparator that is not 4 bytes', () => {
+    expect(() => new OracleProofPrimitive(
+      { oraclePk: new Uint8Array(33), domainSeparator: new Uint8Array(3), expiryDuration: 3600n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+
+  it('rejects zero expiryDuration', () => {
+    expect(() => new OracleProofPrimitive(
+      { oraclePk: new Uint8Array(33), domainSeparator: new Uint8Array(4), expiryDuration: 0n },
+      provider,
+    )).toThrow(CashBlocksError);
+  });
+});
+
+describe('Oracle message edge cases', () => {
+  it('decodeOracleMessage handles empty payload (12-byte message)', () => {
+    const msg = encodeOracleMessage(
+      new Uint8Array([0x01, 0x02, 0x03, 0x04]),
+      100n,
+      1n,
+      new Uint8Array(0),
+    );
+    expect(msg.length).toBe(12);
+    const decoded = decodeOracleMessage(msg);
+    expect(decoded.payload.length).toBe(0);
+    expect(decoded.timestamp).toBe(100n);
+    expect(decoded.nonce).toBe(1n);
+  });
+
+  it('encodeOracleMessage and decodeOracleMessage round-trip', () => {
+    const domain = new Uint8Array([0x56, 0x4f, 0x54, 0x45]);
+    const payload = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]);
+    const msg = encodeOracleMessage(domain, 999n, 42n, payload);
+    const decoded = decodeOracleMessage(msg);
+    expect(decoded.domain).toEqual(domain);
+    expect(decoded.timestamp).toBe(999n);
+    expect(decoded.nonce).toBe(42n);
+    expect(decoded.payload).toEqual(payload);
   });
 });
