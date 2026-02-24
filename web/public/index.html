@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CashBlocks — Composable UTXO Primitives</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-top">
+        <div class="logo">
+          <span class="logo-icon">&#9638;</span>
+          <h1>CashBlocks</h1>
+        </div>
+        <div class="mode-toggle">
+          <button class="mode-btn mode-btn-mock active" data-mode="mock">Mock</button>
+          <button class="mode-btn mode-btn-chipnet" data-mode="chipnet">Chipnet</button>
+        </div>
+      </div>
+      <p class="tagline">Composable UTXO building blocks for Bitcoin Cash</p>
+    </div>
+
+    <div id="chipnet-banner" class="chipnet-banner hidden">
+      <div class="chipnet-banner-content">
+        <div class="chipnet-status">
+          <span id="chipnet-indicator" class="indicator indicator-checking"></span>
+          <span id="chipnet-status-text">Checking chipnet...</span>
+        </div>
+        <div id="chipnet-details" class="chipnet-details hidden">
+          <span class="chipnet-detail"><span class="detail-label">Owner:</span> <span id="chipnet-address">—</span></span>
+          <span class="chipnet-detail"><span class="detail-label">Balance:</span> <span id="chipnet-balance">—</span></span>
+          <span class="chipnet-detail"><span class="detail-label">UTXOs:</span> <span id="chipnet-utxos">—</span></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="scenarios">Scenarios</button>
+    <button class="tab-btn" data-tab="setup">Setup</button>
+    <button class="tab-btn" data-tab="explorer">Explorer</button>
+    <button class="tab-btn" data-tab="learn">Learn</button>
+    <button class="tab-btn" data-tab="history">History</button>
+  </nav>
+
+  <main>
+    <!-- TAB: Scenarios -->
+    <div id="tab-scenarios" class="tab-content active">
+      <section class="primitives-bar">
+        <div class="primitive-chip primitive-vault">Vault</div>
+        <span class="plus">+</span>
+        <div class="primitive-chip primitive-timestate">Time-State</div>
+        <span class="plus">+</span>
+        <div class="primitive-chip primitive-oracle">Oracle Proof</div>
+        <span class="equals">=</span>
+        <span class="compose-label">Atomic Composition</span>
+      </section>
+
+      <section class="scenarios">
+        <h2>Select a Scenario</h2>
+        <div class="scenario-cards">
+          <button class="scenario-card" data-scenario="dao">
+            <div class="card-icon">&#9878;</div>
+            <h3>DAO Governance</h3>
+            <p>Treasury with vote-gated proposals, time phases, and spending limits</p>
+            <div class="card-primitives">
+              <span class="primitive-chip primitive-vault">Vault</span>
+              <span class="primitive-chip primitive-timestate">Time-State</span>
+              <span class="primitive-chip primitive-oracle">Oracle</span>
+            </div>
+          </button>
+          <button class="scenario-card" data-scenario="escrow">
+            <div class="card-icon">&#9879;</div>
+            <h3>DeFi Escrow</h3>
+            <p>Price-oracle escrow with timeout refund for trustless trading</p>
+            <div class="card-primitives">
+              <span class="primitive-chip primitive-vault">Vault</span>
+              <span class="primitive-chip primitive-timestate">Time-State</span>
+              <span class="primitive-chip primitive-oracle">Oracle</span>
+            </div>
+          </button>
+          <button class="scenario-card" data-scenario="insurance">
+            <div class="card-icon">&#9973;</div>
+            <h3>Insurance Pool</h3>
+            <p>Decentralized claims with assessor verification and coverage caps</p>
+            <div class="card-primitives">
+              <span class="primitive-chip primitive-vault">Vault</span>
+              <span class="primitive-chip primitive-timestate">Time-State</span>
+              <span class="primitive-chip primitive-oracle">Oracle</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <section id="result-area" class="result-area hidden">
+        <div id="scenario-header" class="scenario-header">
+          <h2 id="scenario-title"></h2>
+          <p id="scenario-description"></p>
+        </div>
+
+        <div id="params-section" class="params-section">
+          <h3>Setup Parameters</h3>
+          <div id="params-grid" class="params-grid"></div>
+        </div>
+
+        <div class="execution-section">
+          <h3>Execution Log</h3>
+          <div id="loading" class="loading hidden">
+            <span class="cursor">_</span> Running CashScript contracts...
+          </div>
+          <div id="steps-container" class="steps-container"></div>
+        </div>
+
+        <div id="summary-section" class="summary-section hidden">
+          <h3>Summary</h3>
+          <div id="summary-grid" class="summary-grid"></div>
+          <div id="execution-time" class="execution-time"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: Setup -->
+    <div id="tab-setup" class="tab-content">
+      <section class="setup-section">
+        <h2>Chipnet Setup</h2>
+        <p class="section-desc">Generate keys and fund your wallet to run scenarios on BCH Chipnet (testnet).</p>
+
+        <div class="setup-steps">
+          <div class="setup-step">
+            <div class="setup-step-header">
+              <span class="setup-step-num">1</span>
+              <h3>Generate Keys</h3>
+            </div>
+            <p>Create 3 keypairs: Owner (treasury controller), Recipient (whitelisted destination), Oracle (data signer).</p>
+            <div id="keys-panel" class="keys-panel">
+              <div id="keys-status" class="keys-status">Checking keys...</div>
+              <div id="keys-display" class="keys-display hidden">
+                <div class="key-row">
+                  <span class="key-label">Owner</span>
+                  <span id="key-owner-addr" class="key-addr" title="Click to copy">—</span>
+                  <button class="copy-btn" data-copy="key-owner-addr">Copy</button>
+                </div>
+                <div class="key-row">
+                  <span class="key-label">Recipient</span>
+                  <span id="key-recipient-addr" class="key-addr" title="Click to copy">—</span>
+                  <button class="copy-btn" data-copy="key-recipient-addr">Copy</button>
+                </div>
+                <div class="key-row">
+                  <span class="key-label">Oracle</span>
+                  <span id="key-oracle-addr" class="key-addr" title="Click to copy">—</span>
+                  <button class="copy-btn" data-copy="key-oracle-addr">Copy</button>
+                </div>
+              </div>
+              <button id="btn-generate-keys" class="btn btn-primary hidden">Generate Keys</button>
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <div class="setup-step-header">
+              <span class="setup-step-num">2</span>
+              <h3>Fund Owner Address</h3>
+            </div>
+            <p>Get free testnet BCH from the chipnet faucet. Send at least 60,000 sats to the Owner address.</p>
+            <div class="funding-panel">
+              <div class="funding-info">
+                <span class="detail-label">Owner Address:</span>
+                <span id="funding-address" class="funding-addr">Generate keys first</span>
+                <button id="btn-copy-funding" class="copy-btn" disabled>Copy</button>
+              </div>
+              <a id="faucet-link" href="https://tbch.googol.cash/" target="_blank" rel="noopener" class="btn btn-faucet">
+                Open Chipnet Faucet
+              </a>
+              <div class="funding-requirements">
+                <h4>Minimum Funding per Scenario</h4>
+                <div class="funding-grid">
+                  <span>DAO Governance</span><span>57,000 sats</span>
+                  <span>DeFi Escrow</span><span>26,000 sats</span>
+                  <span>Insurance Pool</span><span>36,000 sats</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <div class="setup-step-header">
+              <span class="setup-step-num">3</span>
+              <h3>Check Balance</h3>
+            </div>
+            <p>Verify your owner wallet has enough funds to run scenarios.</p>
+            <div class="balance-panel">
+              <div class="balance-display">
+                <span class="detail-label">Balance:</span>
+                <span id="setup-balance" class="balance-value">—</span>
+                <span class="detail-label" style="margin-left: 16px">UTXOs:</span>
+                <span id="setup-utxos" class="balance-value">—</span>
+              </div>
+              <button id="btn-refresh-balance" class="btn btn-secondary">Refresh Balance</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: Explorer -->
+    <div id="tab-explorer" class="tab-content">
+      <section class="explorer-section">
+        <h2>Contract Explorer</h2>
+        <p class="section-desc">Inspect contract addresses and UTXOs for each scenario on chipnet.</p>
+
+        <div class="explorer-selector">
+          <button class="explorer-btn active" data-explore="dao">DAO</button>
+          <button class="explorer-btn" data-explore="escrow">Escrow</button>
+          <button class="explorer-btn" data-explore="insurance">Insurance</button>
+        </div>
+
+        <div id="explorer-content" class="explorer-content">
+          <div id="explorer-loading" class="loading hidden">
+            <span class="cursor">_</span> Loading contract info...
+          </div>
+          <div id="explorer-empty" class="explorer-empty">
+            <p>Generate keys in the Setup tab to view contract addresses.</p>
+          </div>
+          <div id="contracts-list" class="contracts-list hidden"></div>
+        </div>
+
+        <div id="utxo-viewer" class="utxo-viewer hidden">
+          <h3>UTXO Details</h3>
+          <div id="utxo-address" class="utxo-address"></div>
+          <div id="utxo-list" class="utxo-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: Learn -->
+    <div id="tab-learn" class="tab-content">
+      <section class="learn-section">
+        <h2>How It Works</h2>
+        <p class="section-desc">CashBlocks composes three on-chain primitives into complex financial logic — all enforced by Bitcoin Cash script.</p>
+
+        <div class="learn-cards">
+          <div class="learn-card learn-card-vault">
+            <div class="learn-card-header">
+              <span class="primitive-chip primitive-vault">Vault</span>
+              <span class="learn-file">contracts/vault.cash</span>
+            </div>
+            <h3>UTXO Vault</h3>
+            <p>A covenant that holds funds with programmable spending rules:</p>
+            <ul>
+              <li><strong>Spend limit</strong> — Maximum amount per transaction</li>
+              <li><strong>Whitelisted recipient</strong> — Only sends to a specific P2PKH address</li>
+              <li><strong>Covenant continuation</strong> — Remaining funds return to the same contract</li>
+              <li><strong>Owner signature</strong> — Requires owner's key to authorize spends</li>
+            </ul>
+            <div class="learn-functions">
+              <span class="fn-chip">partialSpend()</span>
+              <span class="fn-chip">fullSpend()</span>
+              <span class="fn-chip">composableSpend()</span>
+            </div>
+          </div>
+
+          <div class="learn-card learn-card-timestate">
+            <div class="learn-card-header">
+              <span class="primitive-chip primitive-timestate">Time-State</span>
+              <span class="learn-file">contracts/time-state.cash</span>
+            </div>
+            <h3>Time-Gated State Machine</h3>
+            <p>A UTXO with three time-based phases:</p>
+            <ul>
+              <li><strong>Phase 0 (Locked)</strong> — Before phase1Time: no spending allowed</li>
+              <li><strong>Phase 1 (Restricted)</strong> — Between phase1 and phase2: partial spend with covenant</li>
+              <li><strong>Phase 2 (Unrestricted)</strong> — After phase2Time: full unrestricted spend</li>
+            </ul>
+            <div class="learn-functions">
+              <span class="fn-chip">spendRestricted()</span>
+              <span class="fn-chip">spendUnrestricted()</span>
+              <span class="fn-chip">composableCheck()</span>
+            </div>
+          </div>
+
+          <div class="learn-card learn-card-oracle">
+            <div class="learn-card-header">
+              <span class="primitive-chip primitive-oracle">Oracle Proof</span>
+              <span class="learn-file">contracts/oracle-proof.cash</span>
+            </div>
+            <h3>Off-Chain Data Verification</h3>
+            <p>Verifies signed data from trusted off-chain sources:</p>
+            <ul>
+              <li><strong>Domain separator</strong> — 4-byte context tag (e.g., "VOTE", "PRIC", "CLAM")</li>
+              <li><strong>Timestamp freshness</strong> — Ensures data is recent (within expiry window)</li>
+              <li><strong>Replay protection</strong> — Unique nonce prevents reuse of old proofs</li>
+              <li><strong>Schnorr signatures</strong> — Efficient on-chain verification via checkDataSig</li>
+            </ul>
+            <div class="learn-functions">
+              <span class="fn-chip">verifyAndSpend()</span>
+              <span class="fn-chip">composableVerify()</span>
+              <span class="fn-chip">verifyWithPayloadConstraint()</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="learn-composition">
+          <h3>Composability</h3>
+          <p>Each primitive has a <code>composable*()</code> function. When multiple contract UTXOs are spent in a single transaction, each validates its own rules. The result is an <strong>atomic AND</strong> — the transaction only succeeds if ALL conditions are met simultaneously.</p>
+
+          <div class="composition-examples">
+            <div class="comp-example">
+              <h4>DAO Governance</h4>
+              <div class="comp-formula">
+                <span class="primitive-chip primitive-vault">Vault</span>
+                <span class="comp-op">(spend limit)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-timestate">Time-State</span>
+                <span class="comp-op">(execution phase)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-oracle">Oracle</span>
+                <span class="comp-op">(vote count)</span>
+              </div>
+              <p>Proposals need passing votes AND execution time window AND amount within budget.</p>
+            </div>
+
+            <div class="comp-example">
+              <h4>DeFi Escrow</h4>
+              <div class="comp-formula">
+                <span class="primitive-chip primitive-vault">Vault</span>
+                <span class="comp-op">(escrow funds)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-timestate">Time-State</span>
+                <span class="comp-op">(deal window)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-oracle">Oracle</span>
+                <span class="comp-op">(price feed)</span>
+              </div>
+              <p>Release only when price meets minimum AND within deal window. Timeout refund via Phase 2.</p>
+            </div>
+
+            <div class="comp-example">
+              <h4>Insurance Pool</h4>
+              <div class="comp-formula">
+                <span class="primitive-chip primitive-vault">Vault</span>
+                <span class="comp-op">(coverage cap)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-timestate">Time-State</span>
+                <span class="comp-op">(payout window)</span>
+                <span class="comp-plus">+</span>
+                <span class="primitive-chip primitive-oracle">Oracle</span>
+                <span class="comp-op">(assessor proof)</span>
+              </div>
+              <p>Claims need assessor approval AND payout window active AND under coverage cap.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: History -->
+    <div id="tab-history" class="tab-content">
+      <section class="history-section">
+        <h2>Execution History</h2>
+        <p class="section-desc">Past scenario runs are stored locally in your browser.</p>
+        <div class="history-actions">
+          <button id="btn-clear-history" class="btn btn-secondary">Clear History</button>
+        </div>
+        <div id="history-list" class="history-list">
+          <div class="history-empty">No executions yet. Run a scenario to see it here.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p id="footer-text">CashBlocks v0.2.0 &mdash; All scenarios run real CashScript contracts with MockNetworkProvider (no BCH needed)</p>
+  </footer>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

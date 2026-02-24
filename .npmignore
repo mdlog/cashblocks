@@ -1,0 +1,22 @@
+# Source and development
+src/
+contracts/
+artifacts/
+test/
+examples/
+scripts/
+web/
+
+# Config
+tsconfig.json
+vitest.config.ts
+.gitignore
+.deploy.json
+.keys.json
+.claude/
+
+# Other
+node_modules/
+*.tsbuildinfo
+.env
+composable_utxo_primitives_architecture.md

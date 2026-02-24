@@ -211,6 +211,26 @@ describe('Vault Primitive', () => {
     expect(tx.txid).toBeDefined();
   });
 
+  it('composableSpend: allows non-whitelisted destination (by design)', async () => {
+    const provider = new MockNetworkProvider();
+    const contract = createVault(provider);
+    const utxo = randomUtxo({ satoshis: 100_000n });
+    provider.addUtxo(contract.address, utxo);
+
+    // composableSpend intentionally skips whitelist check for composability
+    const otherRecipient = makeKeypair();
+    const otherAddr = makeAddress(otherRecipient.pubKey);
+
+    const sig = new SignatureTemplate(owner.privKey);
+    const builder = new TransactionBuilder({ provider });
+    builder.addInput(utxo, contract.unlock.composableSpend(sig, 5_000n, 1n));
+    builder.addOutput({ to: otherAddr.address, amount: 5_000n });
+    builder.addOutput({ to: contract.address, amount: 95_000n });
+
+    const tx = await builder.send();
+    expect(tx.txid).toBeDefined();
+  });
+
   it('composableSpend: continuation at index 0', async () => {
     const provider = new MockNetworkProvider();
     const contract = createVault(provider);

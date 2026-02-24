@@ -1,6 +1,5 @@
 node_modules/
 dist/
-artifacts/
 *.tsbuildinfo
 .env
 .keys.json

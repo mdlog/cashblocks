@@ -54,6 +54,12 @@ contract Vault(pubkey ownerPk, int spendLimit, bytes20 whitelistHash) {
 
     // For composed transactions with other primitives.
     // Validates vault rules but allows flexible output index for continuation.
+    //
+    // SECURITY NOTE: This function intentionally does NOT enforce the whitelist
+    // destination. In composed transactions, output destinations are determined
+    // by the composition logic (e.g., other primitives may dictate where funds go).
+    // The vault still enforces: owner signature, spend limit, and covenant continuation.
+    // Use partialSpend/fullSpend for standalone transactions that need whitelist enforcement.
     function composableSpend(sig ownerSig, int spendAmount, int continuationIndex) {
         require(checkSig(ownerSig, ownerPk));
 

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CashBlocks DeFi Protocol</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+</head>
+<body>
+
+  <!-- ── Sticky Header ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="6" width="8" height="12" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="14" y="6" width="8" height="12" rx="2" fill="#fff" opacity="0.5"/>
+            <rect x="8" y="3" width="8" height="18" rx="2" fill="#fff" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="header-brand">
+          <span class="header-title">CashBlocks</span>
+          <span class="header-dot"></span>
+          <span class="header-subtitle">DeFi Protocol</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="#scenarios" class="nav-link active">Scenarios</a>
+        <a href="#primitives" class="nav-link">Primitives</a>
+        <a href="#sdk" class="nav-link">SDK</a>
+      </nav>
+      <div class="header-right">
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="mock">Mock</button>
+          <button class="mode-btn" data-mode="chipnet">Chipnet</button>
+        </div>
+        <span class="badge badge-net" id="badge-net">
+          <span class="badge-dot"></span>
+          <span id="badge-net-text">Testnet</span>
+        </span>
+        <span class="badge badge-server" id="badge-server">
+          <span class="badge-dot" id="server-dot"></span>
+          <span id="server-status-text">Checking...</span>
+        </span>
+        <span class="badge badge-ver">v1.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow">Bitcoin Cash DeFi</div>
+        <h1 class="hero-title">Composable UTXO<br>Building Blocks</h1>
+        <p class="hero-desc">4 smart contract primitives composed atomically into production DeFi protocols. No backend. No admin keys. Pure on-chain enforcement.</p>
+        <div class="hero-actions">
+          <button type="button" class="btn-primary" id="hero-run-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run Scenarios
+          </button>
+          <button type="button" class="btn-ghost" id="hero-sdk-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            View SDK Code
+          </button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">4</div>
+          <div class="hero-stat-label">Primitives</div>
+          <div class="hero-stat-sub">Vault + Time + Oracle + Token</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="metricBlocked">0</div>
+          <div class="hero-stat-label">Attacks Blocked</div>
+          <div class="hero-stat-sub">On-chain enforcement</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="metricProcessed">0</div>
+          <div class="hero-stat-label">TX Processed</div>
+          <div class="hero-stat-sub">Atomic composition</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">4</div>
+          <div class="hero-stat-label">DeFi Protocols</div>
+          <div class="hero-stat-sub">Lend + DAO + Yield + Insurance</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-glow"></div>
+  </section>
+
+  <!-- ── Wallet Panel (Chipnet Only) ── -->
+  <section class="wallet-section" id="wallet-section" style="display:none">
+    <div class="wallet-inner">
+      <div class="wallet-header">
+        <h3 class="wallet-title">Chipnet Wallet</h3>
+        <span class="badge badge-chipnet">
+          <span class="badge-dot chipnet-dot"></span>
+          Live Blockchain
+        </span>
+      </div>
+      <div class="wallet-grid">
+        <!-- Keys Card -->
+        <div class="wallet-card" id="wallet-keys-card">
+          <div class="wallet-card-label">Keys</div>
+          <div id="wallet-keys-content">
+            <div class="wallet-no-keys" id="wallet-no-keys">
+              <p class="wallet-hint">Generate or import keys to begin</p>
+              <div class="wallet-actions">
+                <button type="button" class="btn-primary btn-sm" id="btn-generate-keys">Generate Keys</button>
+                <button type="button" class="btn-ghost btn-sm" id="btn-import-chipnet-json">Import JSON</button>
+                <input type="file" id="import-chipnet-json-file" accept=".json" style="display:none">
+              </div>
+            </div>
+            <div class="wallet-has-keys" id="wallet-has-keys" style="display:none">
+              <div class="wallet-addr-row">
+                <span class="wallet-addr-label">Owner</span>
+                <span class="wallet-addr-value" id="wallet-owner-addr"></span>
+              </div>
+              <div class="wallet-addr-row">
+                <span class="wallet-addr-label">Recipient</span>
+                <span class="wallet-addr-value" id="wallet-recipient-addr"></span>
+              </div>
+              <div class="wallet-addr-row">
+                <span class="wallet-addr-label">Oracle</span>
+                <span class="wallet-addr-value" id="wallet-oracle-addr"></span>
+              </div>
+              <div class="wallet-actions" style="margin-top:0.75rem">
+                <button type="button" class="btn-ghost btn-sm" id="btn-download-chipnet-keys">Download Keys</button>
+                <button type="button" class="btn-ghost btn-sm btn-danger" id="btn-delete-keys">Delete Keys</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Balance Card -->
+        <div class="wallet-card" id="wallet-balance-card">
+          <div class="wallet-card-label">Balances</div>
+          <div class="wallet-balance-row">
+            <span class="wallet-balance-label">Owner</span>
+            <span class="wallet-balance-value" id="wallet-balance-owner">&mdash;</span>
+          </div>
+          <div class="wallet-balance-row">
+            <span class="wallet-balance-label">Recipient</span>
+            <span class="wallet-balance-value" id="wallet-balance-recipient">&mdash;</span>
+          </div>
+          <div class="wallet-balance-row">
+            <span class="wallet-balance-label">Oracle</span>
+            <span class="wallet-balance-value" id="wallet-balance-oracle">&mdash;</span>
+          </div>
+          <div class="wallet-balance-sub" id="wallet-utxo-count"></div>
+          <button type="button" class="btn-ghost btn-sm" id="btn-refresh-balance" style="margin-top:0.5rem">Refresh All</button>
+        </div>
+        <!-- Fund Card -->
+        <div class="wallet-card" id="wallet-fund-card">
+          <div class="wallet-card-label">Fund via Faucet</div>
+          <div id="wallet-qr" class="wallet-qr"></div>
+          <a href="https://tbch.googol.cash/" target="_blank" rel="noopener" class="btn-ghost btn-sm" style="margin-top:0.5rem;text-align:center;display:inline-block;text-decoration:none">Open Faucet</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Identity Section (Mock Mode) ── -->
+  <section class="identity-section" id="identity-section" style="display:none">
+    <div class="identity-inner">
+      <div class="identity-header">
+        <h3 class="identity-title">Mock Identity</h3>
+        <span class="badge badge-mock">
+          <span class="badge-dot mock-dot"></span>
+          Local Keys
+        </span>
+      </div>
+      <div class="identity-grid" style="grid-template-columns:1fr">
+        <!-- Your Identity Card -->
+        <div class="wallet-card" id="identity-card">
+          <div class="wallet-card-label">Your Identity</div>
+          <div id="identity-no-keys">
+            <p class="wallet-hint">Generate or import a local identity for multi-user testing</p>
+            <div class="wallet-actions">
+              <button type="button" class="btn-primary btn-sm" id="btn-generate-identity">Generate Identity</button>
+              <button type="button" class="btn-ghost btn-sm" id="btn-import-identity">Import Keys</button>
+              <input type="file" id="import-identity-file" accept=".json" style="display:none">
+            </div>
+          </div>
+          <div id="identity-has-keys" style="display:none">
+            <div class="wallet-addr-row">
+              <span class="wallet-addr-label">Address</span>
+              <span class="wallet-addr-value" id="identity-address"></span>
+            </div>
+            <div class="wallet-addr-row">
+              <span class="wallet-addr-label">Public Key</span>
+              <span class="wallet-addr-value" id="identity-pubkey"></span>
+            </div>
+            <div class="wallet-actions" style="margin-top:0.75rem">
+              <button type="button" class="btn-ghost btn-sm" id="btn-download-identity">Download Keys</button>
+              <button type="button" class="btn-ghost btn-sm btn-danger" id="btn-clear-identity">Clear Identity</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Scenario Section ── -->
+  <section class="scenarios-section" id="scenarios">
+    <div class="scenarios-inner">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-label">Protocols</div>
+        <button class="sidebar-item active" data-scenario="lending">
+          <div class="sidebar-icon si-lending">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="sidebar-text">
+            <span class="sidebar-name">Lending Pool</span>
+            <span class="sidebar-meta">4 primitives</span>
+          </div>
+        </button>
+        <button class="sidebar-item" data-scenario="governance">
+          <div class="sidebar-icon si-governance">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="sidebar-text">
+            <span class="sidebar-name">DAO Governance</span>
+            <span class="sidebar-meta">4 primitives</span>
+          </div>
+        </button>
+        <button class="sidebar-item" data-scenario="yield-vault">
+          <div class="sidebar-icon si-yield">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="sidebar-text">
+            <span class="sidebar-name">Yield Vault</span>
+            <span class="sidebar-meta">3 primitives</span>
+          </div>
+        </button>
+        <button class="sidebar-item" data-scenario="insurance">
+          <div class="sidebar-icon si-insurance">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="sidebar-text">
+            <span class="sidebar-name">Insurance Pool</span>
+            <span class="sidebar-meta">4 primitives</span>
+          </div>
+        </button>
+        <div class="sidebar-divider"></div>
+        <button class="sidebar-item" data-scenario="sdk">
+          <div class="sidebar-icon si-sdk">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="sidebar-text">
+            <span class="sidebar-name">SDK Code</span>
+            <span class="sidebar-meta">Examples</span>
+          </div>
+        </button>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content-area">
+
+        <!-- Lending Panel -->
+        <div class="scenario-panel active" id="panel-lending">
+          <div class="panel-header">
+            <div class="panel-info">
+              <h2 class="panel-title">Lending Pool</h2>
+              <p class="panel-desc">Credit-scored micro-lending with 4-primitive atomic composition</p>
+              <div class="panel-tags">
+                <span class="prim-tag vault">Vault</span>
+                <span class="prim-tag timestate">TimeState</span>
+                <span class="prim-tag oracle">Oracle</span>
+                <span class="prim-tag tokengate">TokenGate</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lending Tabs -->
+          <div class="lending-tabs">
+            <button class="lending-tab active" data-ltab="dashboard">Dashboard</button>
+            <button class="lending-tab disabled" data-ltab="borrow" id="ltab-borrow">Borrow</button>
+            <button class="lending-tab disabled" data-ltab="history" id="ltab-history">History</button>
+            <button class="lending-tab" data-ltab="demo">Demo</button>
+          </div>
+
+          <!-- Tab: Dashboard -->
+          <div class="lending-tab-content active" id="ltab-content-dashboard">
+            <!-- Init Form (shown when no active session) -->
+            <div class="lending-swap-card" id="lending-init-card">
+              <div id="lending-loading-overlay" class="loading-overlay" style="display:none">
+                <div class="loading-ring"></div>
+                <div class="loading-text">Initializing Pool</div>
+                <div class="loading-subtext" id="loading-subtext">Deploying mock contracts...</div>
+              </div>
+              <div class="lending-init-form" id="lending-init-form">
+                <div class="init-form-title">Initialize Lending Pool</div>
+                <div class="init-form-grid">
+                  <div class="init-field">
+                    <label class="init-label" for="init-pool-balance">Pool Balance</label>
+                    <div class="amount-input-wrap">
+                      <input type="number" id="init-pool-balance" class="init-input" value="5000000" min="10000">
+                      <span class="input-unit">sats</span>
+                    </div>
+                  </div>
+                  <div class="init-field">
+                    <label class="init-label" for="init-max-loan">Max Loan</label>
+                    <div class="amount-input-wrap">
+                      <input type="number" id="init-max-loan" class="init-input" value="500000" min="1000">
+                      <span class="input-unit">sats</span>
+                    </div>
+                  </div>
+                  <div class="init-field">
+                    <label class="init-label" for="init-min-score">Min Score</label>
+                    <div class="amount-input-wrap">
+                      <input type="number" id="init-min-score" class="init-input" value="50" min="0" max="100">
+                      <span class="input-unit">/100</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn-primary" id="btn-init-pool" style="margin-top:1rem;width:100%">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Initialize Pool
+                </button>
+                <div class="init-error" id="init-error" style="display:none"></div>
+              </div>
+            </div>
+
+            <!-- Available Pools Browser (always visible) -->
+            <div class="lending-pool-browser" id="lending-pool-browser">
+              <div class="pool-browser-header-bar">
+                <div class="pool-browser-title-row">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <span>Available Pools</span>
+                </div>
+                <button type="button" class="btn-ghost btn-sm" id="btn-refresh-pools-dash">Refresh</button>
+              </div>
+              <div class="pool-browser-list" id="pool-browser-list-dash">
+                <div class="pool-browser-empty" id="pool-browser-empty-dash">No other pools available. Be the first to create one above.</div>
+              </div>
+            </div>
+
+            <!-- Active Pool Dashboard (shown after init) -->
+            <div class="lending-dashboard" id="lending-dashboard" style="display:none">
+              <div class="pool-stats">
+                <div class="pool-stat-card">
+                  <div class="pool-stat-label">Pool Balance</div>
+                  <div class="pool-stat-value" id="dash-pool-balance">0.00000000</div>
+                  <div class="pool-stat-sub">BCH</div>
+                </div>
+                <div class="pool-stat-card">
+                  <div class="pool-stat-label">Remaining</div>
+                  <div class="pool-stat-value" id="dash-remaining">0.00000000</div>
+                  <div class="pool-stat-sub">BCH</div>
+                </div>
+                <div class="pool-stat-card">
+                  <div class="pool-stat-label">Loans Processed</div>
+                  <div class="pool-stat-value" id="dash-tx-count">0</div>
+                  <div class="pool-stat-sub">transactions</div>
+                </div>
+              </div>
+
+              <!-- Utilization Ring Chart -->
+              <div class="util-ring-section">
+                <div class="ring-chart">
+                  <svg viewBox="0 0 100 100">
+                    <circle class="ring-bg" cx="50" cy="50" r="40"/>
+                    <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="40"
+                      stroke-dasharray="251.33" stroke-dashoffset="251.33"/>
+                  </svg>
+                  <div class="ring-center">
+                    <div class="ring-pct" id="ring-pct">0%</div>
+                    <div class="ring-label">Used</div>
+                  </div>
+                </div>
+                <div class="ring-info">
+                  <div class="ring-info-title">Pool Utilization</div>
+                  <div id="health-badge" class="health-badge health-healthy">
+                    <span class="health-dot"></span>
+                    <span id="health-text">Healthy</span>
+                  </div>
+                  <div class="ring-stats">
+                    <div class="ring-stat-item">
+                      <span class="ring-stat-val" id="ring-lent">0</span>
+                      <span class="ring-stat-label">Lent</span>
+                    </div>
+                    <div class="ring-stat-item">
+                      <span class="ring-stat-val" id="ring-available">0</span>
+                      <span class="ring-stat-label">Available</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pool-config-summary">
+                <div class="config-item"><span class="config-label">Max Loan</span><span class="config-value" id="dash-max-loan">—</span></div>
+                <div class="config-item"><span class="config-label">Min Score</span><span class="config-value" id="dash-min-score">—</span></div>
+                <div class="config-item"><span class="config-label">Mode</span><span class="config-value" id="dash-mode">—</span></div>
+              </div>
+
+              <!-- Recent Activity -->
+              <div class="recent-activity" id="recent-activity" style="display:none">
+                <div class="recent-activity-title">Recent Activity</div>
+                <div class="recent-list" id="recent-list"></div>
+              </div>
+
+              <button type="button" class="btn-ghost btn-sm btn-danger" id="btn-destroy-pool" style="margin-top:1rem">Destroy Pool</button>
+            </div>
+          </div>
+
+          <!-- Tab: Borrow -->
+          <div class="lending-tab-content" id="ltab-content-borrow">
+            <div class="lending-no-session" id="borrow-no-session">
+              <div class="empty-state">
+                <div class="empty-icon-wrap">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="empty-title">No Active Pool</div>
+                <div class="empty-desc">Initialize a pool from the Dashboard tab to start borrowing.</div>
+              </div>
+            </div>
+            <div class="lending-swap-card" id="borrow-swap-card" style="display:none">
+              <div class="borrow-form" id="borrow-form">
+                <div class="borrow-field">
+                  <label class="init-label" for="loan-recipient">Recipient Address</label>
+                  <div class="recipient-input-wrap">
+                    <input type="text" id="loan-recipient" class="init-input recipient-input" placeholder="bchtest:qz..." spellcheck="false">
+                    <button type="button" class="btn-ghost btn-sm" id="btn-use-my-address" style="flex-shrink:0">Use My Address</button>
+                  </div>
+                  <div class="borrow-hint" id="recipient-hint">Enter the BCH address to receive loan funds</div>
+                  <div class="input-error-msg" id="recipient-error-msg"></div>
+                </div>
+                <div class="borrow-field">
+                  <label class="init-label" for="loan-amount">Loan Amount</label>
+                  <div class="amount-input-wrap">
+                    <input type="number" id="loan-amount" class="init-input" value="100000" min="546">
+                    <button type="button" class="max-btn" id="btn-max-loan">MAX</button>
+                    <span class="input-unit">sats</span>
+                  </div>
+                  <div class="pct-buttons">
+                    <button type="button" class="pct-btn" data-pct="25">25%</button>
+                    <button type="button" class="pct-btn" data-pct="50">50%</button>
+                    <button type="button" class="pct-btn" data-pct="75">75%</button>
+                    <button type="button" class="pct-btn" data-pct="100">Max</button>
+                  </div>
+                  <div class="borrow-hint" id="loan-max-hint">Max: —</div>
+                  <div class="input-error-msg" id="loan-error-msg"></div>
+                </div>
+                <div class="borrow-field">
+                  <label class="init-label">Credit Score: <span id="score-display" class="score-display">50</span></label>
+                  <div class="score-slider-wrap">
+                    <div class="score-tooltip score-med" id="score-tooltip"><span>50</span></div>
+                    <input type="range" id="credit-score" class="score-slider" min="0" max="100" value="50">
+                    <div class="score-threshold" id="score-threshold-marker"></div>
+                  </div>
+                  <div class="score-labels">
+                    <span>0</span>
+                    <span class="score-min-label" id="score-min-label">Min: 50</span>
+                    <span>100</span>
+                  </div>
+                </div>
+                <button type="button" class="btn-primary" id="btn-request-loan" style="margin-top:0.75rem;width:100%">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Request Loan
+                </button>
+                <div class="loan-result" id="loan-result" style="display:none"></div>
+                <div class="loan-attempts" id="loan-attempts">
+                  <div class="loan-attempts-title">Recent Attempts</div>
+                  <div class="loan-attempts-list" id="loan-attempts-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: History -->
+          <div class="lending-tab-content" id="ltab-content-history">
+            <div class="lending-no-session" id="history-no-session">
+              <div class="empty-state">
+                <div class="empty-icon-wrap">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="empty-title">No Transaction History</div>
+                <div class="empty-desc">Initialize a pool from the Dashboard tab to see transaction history.</div>
+              </div>
+            </div>
+            <div class="history-panel" id="history-panel" style="display:none">
+              <div class="history-table-wrap">
+                <table class="history-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Amount</th>
+                      <th>Score</th>
+                      <th>Status</th>
+                      <th>TxID</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-tbody"></tbody>
+                </table>
+              </div>
+              <div class="history-empty" id="history-empty">No transactions yet.</div>
+            </div>
+          </div>
+
+          <!-- Tab: Demo (existing automated scenario) -->
+          <div class="lending-tab-content" id="ltab-content-demo">
+            <div class="demo-header">
+              <div class="demo-info">Run the automated demo scenario with pre-scripted blocked/success transactions.</div>
+              <button class="run-btn" type="button" data-run="lending">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Run Scenario
+              </button>
+            </div>
+            <div class="panel-config">
+              <div class="config-item"><span class="config-label">Pool</span><span class="config-value">0.05000000 BCH</span></div>
+              <div class="config-item"><span class="config-label">Max Loan</span><span class="config-value">0.00500000 BCH</span></div>
+              <div class="config-item"><span class="config-label">Min Score</span><span class="config-value">50</span></div>
+              <div class="config-item"><span class="config-label">Gov Tokens</span><span class="config-value">100</span></div>
+            </div>
+            <div class="timeline-container" id="timeline-lending" style="display:none">
+              <div class="timeline-header">
+                <span class="timeline-label">Execution Timeline</span>
+                <span class="timeline-count" id="count-lending"></span>
+              </div>
+              <div class="timeline" id="steps-lending"></div>
+              <div class="summary-box" id="summary-lending" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Governance Panel -->
+        <div class="scenario-panel" id="panel-governance">
+          <div class="panel-header">
+            <div class="panel-info">
+              <h2 class="panel-title">DAO Governance</h2>
+              <p class="panel-desc">Token-gated treasury proposals with vote verification</p>
+              <div class="panel-tags">
+                <span class="prim-tag vault">Vault</span>
+                <span class="prim-tag timestate">TimeState</span>
+                <span class="prim-tag oracle">Oracle</span>
+                <span class="prim-tag tokengate">TokenGate</span>
+              </div>
+            </div>
+            <button class="run-btn" type="button" data-run="governance">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Scenario
+            </button>
+          </div>
+          <div class="panel-config">
+            <div class="config-item"><span class="config-label">Treasury</span><span class="config-value">0.10000000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Max Proposal</span><span class="config-value">0.02000000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Min Votes</span><span class="config-value">100</span></div>
+            <div class="config-item"><span class="config-label">Gov Tokens</span><span class="config-value">50</span></div>
+          </div>
+          <div class="timeline-container" id="timeline-governance" style="display:none">
+            <div class="timeline-header">
+              <span class="timeline-label">Execution Timeline</span>
+              <span class="timeline-count" id="count-governance"></span>
+            </div>
+            <div class="timeline" id="steps-governance"></div>
+            <div class="summary-box" id="summary-governance" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Yield Vault Panel -->
+        <div class="scenario-panel" id="panel-yield-vault">
+          <div class="panel-header">
+            <div class="panel-info">
+              <h2 class="panel-title">Yield Vault</h2>
+              <p class="panel-desc">Time-locked deposits with maturity-gated withdrawals</p>
+              <div class="panel-tags">
+                <span class="prim-tag vault">Vault</span>
+                <span class="prim-tag timestate">TimeState</span>
+                <span class="prim-tag tokengate">TokenGate</span>
+              </div>
+            </div>
+            <button class="run-btn" type="button" data-run="yield-vault">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Scenario
+            </button>
+          </div>
+          <div class="panel-config">
+            <div class="config-item"><span class="config-label">Deposit</span><span class="config-value">0.03000000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Max Withdraw</span><span class="config-value">0.01000000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Stake Tokens</span><span class="config-value">25</span></div>
+          </div>
+          <div class="timeline-container" id="timeline-yield-vault" style="display:none">
+            <div class="timeline-header">
+              <span class="timeline-label">Execution Timeline</span>
+              <span class="timeline-count" id="count-yield-vault"></span>
+            </div>
+            <div class="timeline" id="steps-yield-vault"></div>
+            <div class="summary-box" id="summary-yield-vault" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Insurance Panel -->
+        <div class="scenario-panel" id="panel-insurance">
+          <div class="panel-header">
+            <div class="panel-info">
+              <h2 class="panel-title">Insurance Pool</h2>
+              <p class="panel-desc">Oracle-verified claim processing with coverage limits</p>
+              <div class="panel-tags">
+                <span class="prim-tag vault">Vault</span>
+                <span class="prim-tag timestate">TimeState</span>
+                <span class="prim-tag oracle">Oracle</span>
+                <span class="prim-tag tokengate">TokenGate</span>
+              </div>
+            </div>
+            <button class="run-btn" type="button" data-run="insurance">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Scenario
+            </button>
+          </div>
+          <div class="panel-config">
+            <div class="config-item"><span class="config-label">Pool</span><span class="config-value">0.08000000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Max Claim</span><span class="config-value">0.01500000 BCH</span></div>
+            <div class="config-item"><span class="config-label">Min Damage</span><span class="config-value">200</span></div>
+            <div class="config-item"><span class="config-label">Policy Tokens</span><span class="config-value">10</span></div>
+          </div>
+          <div class="timeline-container" id="timeline-insurance" style="display:none">
+            <div class="timeline-header">
+              <span class="timeline-label">Execution Timeline</span>
+              <span class="timeline-count" id="count-insurance"></span>
+            </div>
+            <div class="timeline" id="steps-insurance"></div>
+            <div class="summary-box" id="summary-insurance" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- SDK Code Panel -->
+        <div class="scenario-panel" id="panel-sdk">
+          <div class="panel-header">
+            <div class="panel-info">
+              <h2 class="panel-title">SDK Code Examples</h2>
+              <p class="panel-desc">Build your own DeFi protocol with CashBlocks</p>
+            </div>
+          </div>
+          <div class="code-tabs">
+            <button class="code-tab active" data-code="init">Initialize</button>
+            <button class="code-tab" data-code="oracle">Oracle Sign</button>
+            <button class="code-tab" data-code="compose">Compose TX</button>
+            <button class="code-tab" data-code="tokens">CashTokens</button>
+          </div>
+          <div class="code-panel" id="code-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Primitives Reference ── -->
+  <section class="primitives-section" id="primitives">
+    <div class="primitives-inner">
+      <div class="section-header">
+        <div class="section-eyebrow">Architecture</div>
+        <h2 class="section-title">Composable Primitives</h2>
+        <p class="section-desc">Each primitive enforces a single security property. Compose them atomically for complex DeFi logic.</p>
+      </div>
+      <div class="prim-grid">
+        <div class="prim-card prim-vault">
+          <div class="prim-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="prim-name">Vault</h3>
+          <p class="prim-desc">UTXO custody with per-transaction spending limits, whitelisted destinations, and covenant continuation</p>
+          <div class="prim-features">
+            <span>Spend Limits</span>
+            <span>Whitelist</span>
+            <span>Covenant</span>
+          </div>
+        </div>
+        <div class="prim-card prim-timestate">
+          <div class="prim-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 class="prim-name">TimeState</h3>
+          <p class="prim-desc">Phase-based time gates enforced via CLTV: Locked, Restricted, and Unrestricted phases</p>
+          <div class="prim-features">
+            <span>3 Phases</span>
+            <span>CLTV</span>
+            <span>Timelocks</span>
+          </div>
+        </div>
+        <div class="prim-card prim-oracle">
+          <div class="prim-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3 class="prim-name">Oracle Proof</h3>
+          <p class="prim-desc">Off-chain data verified on-chain via Schnorr checkDataSig with domain separation and expiry</p>
+          <div class="prim-features">
+            <span>Schnorr</span>
+            <span>Domain Sep</span>
+            <span>Expiry</span>
+          </div>
+        </div>
+        <div class="prim-card prim-tokengate">
+          <div class="prim-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <h3 class="prim-name">TokenGate</h3>
+          <p class="prim-desc">CashToken ownership validation with fungible token gating and introspection opcodes</p>
+          <div class="prim-features">
+            <span>CashTokens</span>
+            <span>Fungible</span>
+            <span>Introspect</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo logo-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="6" width="8" height="12" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="14" y="6" width="8" height="12" rx="2" fill="#fff" opacity="0.5"/>
+            <rect x="8" y="3" width="8" height="18" rx="2" fill="#fff" opacity="0.7"/>
+          </svg>
+        </div>
+        <span>Built with <strong>CashBlocks SDK</strong></span>
+      </div>
+      <div class="footer-links">
+        <span>CashScript ^0.11.0</span>
+        <span class="footer-sep"></span>
+        <span>Bitcoin Cash</span>
+        <span class="footer-sep"></span>
+        <span>MIT License</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

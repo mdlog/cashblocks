@@ -1,23 +1,17 @@
 import { Contract, SignatureTemplate } from 'cashscript';
-import type { NetworkProvider, Utxo } from 'cashscript';
-import { compileFile } from 'cashc';
+import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { OracleProofParams } from '../utils/types.js';
 import { encodeOracleMessage } from '../utils/encoding.js';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CONTRACT_PATH = resolve(__dirname, '../../contracts/oracle-proof.cash');
+import defaultArtifact from '../artifacts/oracle-proof.json' with { type: 'json' };
 
 export class OracleProofPrimitive {
   public contract: Contract;
   private params: OracleProofParams;
 
-  constructor(params: OracleProofParams, provider: NetworkProvider) {
-    const artifact = compileFile(CONTRACT_PATH);
+  constructor(params: OracleProofParams, provider: NetworkProvider, artifact?: Artifact) {
+    const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
-    this.contract = new Contract(artifact, [
+    this.contract = new Contract(art, [
       params.oraclePk,
       params.domainSeparator,
       params.expiryDuration,

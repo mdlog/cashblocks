@@ -1,0 +1,124 @@
+{
+  "contractName": "TimeState",
+  "constructorInputs": [
+    {
+      "name": "ownerPk",
+      "type": "pubkey"
+    },
+    {
+      "name": "phase1Time",
+      "type": "int"
+    },
+    {
+      "name": "phase2Time",
+      "type": "int"
+    }
+  ],
+  "abi": [
+    {
+      "name": "spendRestricted",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        },
+        {
+          "name": "spendAmount",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "spendUnrestricted",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        }
+      ]
+    },
+    {
+      "name": "composableCheck",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        },
+        {
+          "name": "requiredPhase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_CHECKLOCKTIMEVERIFY OP_DROP OP_TXLOCKTIME OP_GREATERTHAN OP_VERIFY e803 OP_INPUTINDEX OP_UTXOVALUE OP_3 OP_PICK OP_SUB OP_SWAP OP_SUB OP_ROT OP_0 OP_GREATERTHAN OP_VERIFY OP_DUP 2202 OP_GREATERTHAN OP_VERIFY OP_INPUTINDEX OP_UTXOBYTECODE OP_0 OP_OUTPUTBYTECODE OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE OP_NUMEQUAL OP_NIP OP_ELSE OP_3 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_SWAP OP_CHECKLOCKTIMEVERIFY OP_2DROP OP_DROP OP_1 OP_ELSE OP_3 OP_ROLL OP_2 OP_NUMEQUALVERIFY OP_3 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_2 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_DUP OP_CHECKLOCKTIMEVERIFY OP_DROP OP_TXLOCKTIME OP_2 OP_PICK OP_LESSTHAN OP_VERIFY OP_ELSE OP_2 OP_PICK OP_2 OP_NUMEQUALVERIFY OP_OVER OP_CHECKLOCKTIMEVERIFY OP_DROP OP_ENDIF OP_2DROP OP_DROP OP_1 OP_ENDIF OP_ENDIF",
+  "source": "pragma cashscript ^0.11.0;\n\n// Time-State Primitive\n// A UTXO whose spending rights change based on time phases:\n//   Phase 0 (Locked):       tx.time < phase1Time  → no spend allowed\n//   Phase 1 (Restricted):   phase1Time <= tx.time < phase2Time → partial spend, must continue\n//   Phase 2 (Unrestricted): tx.time >= phase2Time → full spend, no continuation needed\n\ncontract TimeState(pubkey ownerPk, int phase1Time, int phase2Time) {\n\n    // Phase 1: Restricted spend. Must leave a continuation UTXO.\n    function spendRestricted(sig ownerSig, int spendAmount) {\n        require(checkSig(ownerSig, ownerPk));\n\n        // Enforce Phase 1 time window\n        require(tx.time >= phase1Time);\n        require(tx.locktime < phase2Time);\n\n        int minerFee = 1000;\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int changeValue = inputValue - spendAmount - minerFee;\n\n        require(spendAmount > 0);\n        require(changeValue > 546); // Must leave funds behind in Phase 1\n\n        // Covenant: continuation UTXO at output 0\n        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;\n        require(tx.outputs[0].lockingBytecode == selfLocking);\n        require(tx.outputs[0].value == changeValue);\n    }\n\n    // Phase 2: Unrestricted spend. Owner has full control.\n    function spendUnrestricted(sig ownerSig) {\n        require(checkSig(ownerSig, ownerPk));\n\n        // Enforce Phase 2\n        require(tx.time >= phase2Time);\n\n        // No covenant — owner can spend freely\n    }\n\n    // For composed transactions. Validates that the current phase is active.\n    function composableCheck(sig ownerSig, int requiredPhase) {\n        require(checkSig(ownerSig, ownerPk));\n\n        if (requiredPhase == 1) {\n            require(tx.time >= phase1Time);\n            require(tx.locktime < phase2Time);\n        } else {\n            // Phase 2\n            require(requiredPhase == 2);\n            require(tx.time >= phase2Time);\n        }\n    }\n}\n",
+  "debug": {
+    "bytecode": "5379009c63547a7cadb175c5a06902e803c0c65379947c947b00a06976022202a069c0c700cd8800cc9c77675379519c63547a7cad7cb16d755167537a529d537a7cad5279519c6376b175c552799f69675279529d78b175686d75516868",
+    "sourceMap": "12:4:30:5;;;;;13:25:13:33;;:35::42;:8::45:1;16::16:39;;17:16:17:27:0;:::40:1;:8::42;19:23:19:27:0;20:35:20:56;:25::63:1;21:39:21:50:0;;:26:::1;:53::61:0;:26:::1;23:16:23:27:0;:30::31;:16:::1;:8::33;24:16:24:27:0;:30::33;:16:::1;:8::35;27:38:27:59:0;:28::76:1;28:27:28:28:0;:16::45:1;:8::62;29:27:29:28:0;:16::35:1;:8::52;12:4:30:5;;33::40::0;;;;;34:25:34:33;;:35::42;:8::45:1;37:27:37:37:0;:8::39:1;33:4:40:5;;;;43::54::0;;;;44:25:44:33;;:35::42;:8::45:1;46:12:46:25:0;;:29::30;:12:::1;:32:49:9:0;47:31:47:41;:12::43:1;;48:20:48:31:0;:34::44;;:20:::1;:12::46;49:15:53:9:0;51:20:51:33;;:37::38;:12::40:1;52:31:52:41:0;:12::43:1;;49:15:53:9;43:4:54:5;;;9:0:55:1;",
+    "logs": [],
+    "requires": [
+      {
+        "ip": 11,
+        "line": 13
+      },
+      {
+        "ip": 12,
+        "line": 16
+      },
+      {
+        "ip": 16,
+        "line": 17
+      },
+      {
+        "ip": 28,
+        "line": 23
+      },
+      {
+        "ip": 32,
+        "line": 24
+      },
+      {
+        "ip": 37,
+        "line": 28
+      },
+      {
+        "ip": 41,
+        "line": 29
+      },
+      {
+        "ip": 51,
+        "line": 34
+      },
+      {
+        "ip": 53,
+        "line": 37
+      },
+      {
+        "ip": 65,
+        "line": 44
+      },
+      {
+        "ip": 72,
+        "line": 47
+      },
+      {
+        "ip": 78,
+        "line": 48
+      },
+      {
+        "ip": 83,
+        "line": 51
+      },
+      {
+        "ip": 85,
+        "line": 52
+      }
+    ]
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.11.5"
+  },
+  "updatedAt": "2026-02-20T15:41:46.294Z"
+}

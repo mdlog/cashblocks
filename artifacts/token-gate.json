@@ -1,0 +1,83 @@
+{
+  "contractName": "TokenGate",
+  "constructorInputs": [
+    {
+      "name": "requiredCategory",
+      "type": "bytes32"
+    },
+    {
+      "name": "minTokenAmount",
+      "type": "int"
+    }
+  ],
+  "abi": [
+    {
+      "name": "verifyTokenAndSpend",
+      "inputs": [
+        {
+          "name": "spenderPk",
+          "type": "pubkey"
+        },
+        {
+          "name": "spenderSig",
+          "type": "sig"
+        }
+      ]
+    },
+    {
+      "name": "composableVerify",
+      "inputs": [
+        {
+          "name": "continuationIndex",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "bytecode": "OP_2 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_4 OP_ROLL OP_CHECKSIGVERIFY OP_INPUTINDEX OP_UTXOTOKENCATEGORY OP_EQUALVERIFY OP_INPUTINDEX OP_UTXOTOKENAMOUNT OP_LESSTHANOREQUAL OP_NIP OP_ELSE OP_ROT OP_1 OP_NUMEQUALVERIFY OP_INPUTINDEX OP_UTXOTOKENCATEGORY OP_EQUALVERIFY OP_INPUTINDEX OP_UTXOTOKENAMOUNT OP_LESSTHANOREQUAL OP_VERIFY OP_INPUTINDEX OP_UTXOBYTECODE OP_OVER OP_OUTPUTBYTECODE OP_EQUALVERIFY OP_DUP OP_OUTPUTTOKENCATEGORY OP_INPUTINDEX OP_UTXOTOKENCATEGORY OP_EQUALVERIFY OP_OUTPUTTOKENAMOUNT OP_INPUTINDEX OP_UTXOTOKENAMOUNT OP_GREATERTHANOREQUAL OP_ENDIF",
+  "source": "pragma cashscript ^0.11.0;\n\n// TokenGate Primitive\n// A composable primitive that validates CashToken ownership before allowing spending.\n// Used to gate transactions based on fungible token balance.\n//\n// Use cases:\n// - DAO governance: require governance tokens to execute proposals\n// - Membership access: require minimum token balance to unlock features\n// - Token-weighted limits: tie spending power to token holdings\n//\n// Composition: In composed transactions, TokenGate verifies token ownership\n// and preserves tokens in a continuation output. Other primitives in the same TX\n// handle the actual spending logic (Vault), time gates (TimeState), and data (Oracle).\n\ncontract TokenGate(bytes32 requiredCategory, int minTokenAmount) {\n\n    // Standalone: verify token ownership and allow full spend\n    function verifyTokenAndSpend(pubkey spenderPk, sig spenderSig) {\n        require(checkSig(spenderSig, spenderPk));\n\n        // Verify this UTXO carries the required fungible token\n        require(tx.inputs[this.activeInputIndex].tokenCategory == requiredCategory);\n        require(tx.inputs[this.activeInputIndex].tokenAmount >= minTokenAmount);\n    }\n\n    // Composable: verify token, preserve in continuation, allow composed TX\n    // continuationIndex: which output preserves the token gate UTXO\n    function composableVerify(int continuationIndex) {\n        // Verify input has required token\n        require(tx.inputs[this.activeInputIndex].tokenCategory == requiredCategory);\n        require(tx.inputs[this.activeInputIndex].tokenAmount >= minTokenAmount);\n\n        // Ensure tokens are preserved in continuation output (covenant)\n        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;\n        require(tx.outputs[continuationIndex].lockingBytecode == selfLocking);\n        require(tx.outputs[continuationIndex].tokenCategory == tx.inputs[this.activeInputIndex].tokenCategory);\n        require(tx.outputs[continuationIndex].tokenAmount >= tx.inputs[this.activeInputIndex].tokenAmount);\n    }\n}\n",
+  "debug": {
+    "bytecode": "5279009c63547a547aadc0ce88c0d0a177677b519dc0ce88c0d0a169c0c778cd8876d1c0ce88d3c0d0a268",
+    "sourceMap": "19:4:25:5;;;;;20:25:20:35;;:37::46;;:8::49:1;23:26:23:47:0;:16::62:1;:8::84;24:26:24:47:0;:16::60:1;:8::80;19:4:25:5;;29::39::0;;;31:26:31:47;:16::62:1;:8::84;32:26:32:47:0;:16::60:1;:::78;:8::80;35:38:35:59:0;:28::76:1;36:27:36:44:0;:16::61:1;:8::78;37:27:37:44:0;:16::59:1;:73::94:0;:63::109:1;:8::111;38:16:38:57;:71::92:0;:61::105:1;:8::107;16:0:40:1",
+    "logs": [],
+    "requires": [
+      {
+        "ip": 11,
+        "line": 20
+      },
+      {
+        "ip": 14,
+        "line": 23
+      },
+      {
+        "ip": 18,
+        "line": 24
+      },
+      {
+        "ip": 25,
+        "line": 31
+      },
+      {
+        "ip": 29,
+        "line": 32
+      },
+      {
+        "ip": 34,
+        "line": 36
+      },
+      {
+        "ip": 39,
+        "line": 37
+      },
+      {
+        "ip": 44,
+        "line": 38
+      }
+    ]
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.11.5"
+  },
+  "updatedAt": "2026-02-20T15:41:46.842Z"
+}

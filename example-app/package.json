@@ -1,0 +1,19 @@
+{
+  "name": "cashblocks-defi-protocol",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "DeFi Protocol Suite built with CashBlocks SDK — Lending, Governance, Yield Vault, Insurance on Bitcoin Cash",
+  "scripts": {
+    "start": "node app.mjs",
+    "dev": "node server.mjs",
+    "test": "node test-sdk.mjs",
+    "keys:generate": "node generate-keys.mjs"
+  },
+  "keywords": ["bitcoin-cash", "defi", "cashblocks", "lending", "governance", "insurance", "yield", "cashtokens", "cashscript"],
+  "license": "MIT",
+  "dependencies": {
+    "cashblocks": "^0.2.1",
+    "cashscript": "^0.11.5",
+    "express": "^5.2.1"
+  }
+}

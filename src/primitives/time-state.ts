@@ -1,23 +1,17 @@
 import { Contract, SignatureTemplate } from 'cashscript';
-import type { NetworkProvider, Utxo } from 'cashscript';
-import { compileFile } from 'cashc';
+import type { Artifact, NetworkProvider, Utxo } from 'cashscript';
 import type { TimeStateParams } from '../utils/types.js';
 import { TimePhase } from '../utils/types.js';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CONTRACT_PATH = resolve(__dirname, '../../contracts/time-state.cash');
+import defaultArtifact from '../artifacts/time-state.json' with { type: 'json' };
 
 export class TimeStatePrimitive {
   public contract: Contract;
   private params: TimeStateParams;
 
-  constructor(params: TimeStateParams, provider: NetworkProvider) {
-    const artifact = compileFile(CONTRACT_PATH);
+  constructor(params: TimeStateParams, provider: NetworkProvider, artifact?: Artifact) {
+    const art = artifact ?? (defaultArtifact as unknown as Artifact);
     this.params = params;
-    this.contract = new Contract(artifact, [
+    this.contract = new Contract(art, [
       params.ownerPk,
       params.phase1Time,
       params.phase2Time,

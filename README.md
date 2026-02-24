@@ -1,10 +1,27 @@
 # CashBlocks
 
+[![npm version](https://img.shields.io/npm/v/cashblocks.svg)](https://www.npmjs.com/package/cashblocks)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **Composable UTXO building blocks for Bitcoin Cash.**
 
-Three primitives — Vault, Time-State, and Oracle Proof — that developers can combine in atomic transactions to build DeFi, DAOs, vesting, and more. No backends, no admins, no multisig.
+Four primitives — Vault, Time-State, Oracle Proof, and TokenGate (CashTokens) — that developers can combine in atomic transactions to build DeFi, DAOs, vesting, and more. No backends, no admins, no multisig.
 
 Deployed & verified on BCH Chipnet — see [Chipnet Deployment](#chipnet-deployment).
+
+## Installation
+
+```bash
+# As a dependency in your project
+npm install cashblocks cashscript
+
+# For development (clone the repo)
+git clone https://github.com/mdlog/cashblocks.git
+cd cashblocks
+npm install
+npm run compile:contracts
+npm test    # 42 tests
+```
 
 ## Primitives
 
@@ -45,37 +62,56 @@ Message format: [domain 4B][timestamp 4B][nonce 4B][payload NB]
 └── verifyWithPayloadConstraint(... , minValue)         → value-gated
 ```
 
+### TokenGate (CashTokens)
+Validate **CashToken ownership** before allowing spending. Supports fungible token gating for governance, membership, and access control.
+
+```
+TokenGate(requiredCategory, minTokenAmount)
+├── verifyTokenAndSpend(spenderPk, sig)     → standalone token check
+└── composableVerify(continuationIndex)      → for composed TX, preserves tokens
+```
+
 ## Composition Pattern
 
 Primitives don't call each other. Composition happens by **consuming multiple UTXOs in one atomic transaction**. If any primitive's script fails, the entire transaction is rejected.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                 Single Transaction                   │
-│                                                      │
-│  Input 0: Vault UTXO       → "Is spend within policy?" │
-│  Input 1: Time-State UTXO  → "Is it time yet?"       │
-│  Input 2: Oracle Proof UTXO → "Is condition met?"    │
-│                                                      │
-│  Output 0: Vault continuation (remaining funds)      │
-│  Output 1: Payment to recipient                      │
-│                                                      │
-│  ALL inputs must validate → atomic, trustless         │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                    Single Transaction                     │
+│                                                          │
+│  Input 0: Vault UTXO        → "Is spend within policy?"  │
+│  Input 1: Time-State UTXO   → "Is it time yet?"          │
+│  Input 2: Oracle Proof UTXO → "Is condition met?"         │
+│  Input 3: TokenGate UTXO    → "Has governance tokens?"    │
+│                                                          │
+│  Output 0: Vault continuation (remaining funds)           │
+│  Output 1: Payment to recipient                           │
+│  Output 2: TokenGate continuation (tokens preserved)      │
+│                                                          │
+│  ALL inputs must validate → atomic, trustless              │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ## Quick Start
 
 ```bash
-npm install
-npm run compile:contracts
-npm test                        # 33 tests
-npx tsx examples/05-conditional-treasury.ts  # flagship demo
+npm install cashblocks cashscript
+```
+
+```typescript
+import {
+  VaultPrimitive,
+  TimeStatePrimitive,
+  OracleProofPrimitive,
+  TokenGatePrimitive,
+  TransactionComposer,
+  createProvider,
+} from 'cashblocks';
 ```
 
 ## Chipnet Deployment
 
-All three contracts have been deployed and tested on BCH Chipnet (testnet).
+Vault, Time-State, and Oracle Proof contracts have been deployed and tested on BCH Chipnet (testnet). TokenGate is unit-tested (8 tests) and ready for chipnet deployment — it requires CashToken minting on-chain.
 
 ### Deploy Your Own
 
@@ -107,6 +143,7 @@ npm run test:chipnet
 - **Vault**: Fully functional. Partial spend with covenant continuation verified multiple times on-chain.
 - **Oracle Proof**: Fully functional. Schnorr `checkDataSig` verification with domain, timestamp, nonce, and expiry all validated on-chain.
 - **Time-State**: Requires the network's Median Time Past (MTP) to catch up to `phase1Time`. On chipnet, blocks are mined every ~20 minutes and MTP can lag 2-4 hours behind real time. Time-State works correctly once MTP >= the configured phase time.
+- **TokenGate**: Unit-tested with MockNetworkProvider (8/8 tests pass). Chipnet deployment requires minting CashTokens via a genesis transaction first.
 
 ## Project Structure
 
@@ -115,13 +152,15 @@ contracts/
   vault.cash              # Vault CashScript contract
   time-state.cash         # Time-State CashScript contract
   oracle-proof.cash       # Oracle Proof CashScript contract
+  token-gate.cash         # TokenGate CashScript contract (CashTokens)
 src/
   primitives/
     vault.ts              # Vault SDK helper
     time-state.ts         # Time-State SDK helper
     oracle-proof.ts       # Oracle Proof SDK helper
+    token-gate.ts         # TokenGate SDK helper (CashTokens)
   composer/
-    transaction-composer.ts  # Multi-primitive TX builder
+    transaction-composer.ts  # Multi-primitive TX builder (supports tokens)
   utils/
     types.ts              # Shared interfaces & enums
     encoding.ts           # Oracle message encoding
@@ -138,48 +177,84 @@ examples/
   04-vault-with-timelock.ts # Vault + Time-State (2 primitives)
   05-conditional-treasury.ts # All 3 primitives composed
   06-vesting-schedule.ts  # Multi-round vesting simulation
+  07-dao-governance.ts    # DAO treasury with vote-gated proposals
+  08-defi-escrow.ts       # Price-oracle escrow with timeout refund
+  09-insurance-pool.ts    # Decentralized insurance claim processing
+  10-token-gated-dao.ts   # Token-gated DAO with CashTokens (4 primitives!)
+example-app/              # Standalone DeFi protocol suite (4 scenarios)
+web/                      # Express web demo server (port 5555)
 test/
-  vault.test.ts           # 11 tests
+  vault.test.ts           # 12 tests
   time-state.test.ts      # 10 tests
   oracle-proof.test.ts    # 8 tests
+  token-gate.test.ts      # 8 tests (CashTokens)
   composer.test.ts        # 4 tests
 ```
 
 ## Examples
 
-### Basic Vault
+### Using CashBlocks from npm
+
 ```typescript
-import { Contract, SignatureTemplate, TransactionBuilder, MockNetworkProvider, randomUtxo } from 'cashscript';
-import { compileFile } from 'cashc';
+import { VaultPrimitive, TransactionComposer, createProvider } from 'cashblocks';
 
-const artifact = compileFile('./contracts/vault.cash');
-const contract = new Contract(artifact, [ownerPub, 10_000n, recipientPkh], { provider });
+const provider = createProvider('chipnet');
+const vault = new VaultPrimitive(
+  { ownerPk, spendLimit: 10_000n, whitelistHash: recipientPkh },
+  provider,
+);
 
-// Fund the vault
-provider.addUtxo(contract.address, randomUtxo({ satoshis: 100_000n }));
-
-// Partial spend
-const builder = new TransactionBuilder({ provider });
-builder.addInput(utxo, contract.unlock.partialSpend(new SignatureTemplate(ownerPriv), 5_000n));
-builder.addOutput({ to: recipientAddr, amount: 5_000n });
-builder.addOutput({ to: contract.address, amount: 94_000n }); // covenant continuation
-await builder.send();
+console.log('Vault address:', vault.address);
+console.log('Balance:', await vault.getBalance());
 ```
 
-### Conditional Treasury (3 Primitives)
+### Composing Multiple Primitives
+
 ```typescript
-import { TransactionComposer } from './src/composer/transaction-composer.js';
+import { TransactionComposer } from 'cashblocks';
 
 const composer = new TransactionComposer(provider);
 composer
-  .addInput(vaultUtxo, vault.unlock.composableSpend(ownerSig, 100_000n, 0n))
-  .addInput(tsUtxo, timeState.unlock.composableCheck(ownerSig, 1n))
-  .addInput(oracleUtxo, oracle.unlock.composableVerify(oracleSig, message))
+  .addInput(vaultUtxo, vault.getComposableUnlocker(ownerKey, 100_000n, 0))
+  .addInput(tsUtxo, timeState.getComposableUnlocker(ownerKey, 1))
+  .addInput(oracleUtxo, oracle.getComposableUnlocker(oracleSig, message))
   .addOutput(vault.address, 4_900_000n)   // vault continuation
   .addOutput(recipientAddr, 100_000n)      // payment
   .setLocktime(1_700_100_100);
 
 await composer.send(); // All 3 primitives validate atomically
+```
+
+### Real-World Use Case Examples
+
+These examples demonstrate CashBlocks solving real problems — each runs with `MockNetworkProvider` (no BCH needed):
+
+| Example | Command | What It Proves |
+|---------|---------|---------------|
+| **DAO Governance** | `npm run example:dao` | Treasury proposals require vote threshold (oracle) + time gate + spending limit. 3 attacks blocked, 2 proposals executed. |
+| **DeFi Escrow** | `npm run example:escrow` | Escrow releases only when oracle confirms price >= minimum. Timeout refund if deal expires. |
+| **Insurance Pool** | `npm run example:insurance` | Claims require assessor verification (oracle) + cooling period (time gate) + coverage cap (vault). Multi-claim covenant continuation. |
+| **Token-Gated DAO** | `npm run example:token-dao` | **CashTokens!** Governance requires holding fungible tokens. 4 primitives composed atomically. 2 attacks blocked, 2 proposals with token preservation. |
+
+Each example shows **failure cases first** (blocked attacks) then **success cases**, proving the on-chain logic enforces all conditions atomically.
+
+### Web Demo
+
+```bash
+npm run web    # Starts Express server on port 5555
+```
+
+Interactive web UI with SSE streaming for running DAO, Escrow, and Insurance scenarios — both mock and chipnet modes.
+
+### Example App
+
+A standalone DeFi protocol suite in `example-app/` demonstrating 4 scenarios: Lending Pool, DAO Governance, Yield Vault, and Insurance Pool.
+
+```bash
+cd example-app
+npm install
+npm start           # Run all 4 scenarios (CLI)
+npm run dev         # Start web dashboard (port 3060)
 ```
 
 ## Technical Details
@@ -190,21 +265,23 @@ await composer.send(); // All 3 primitives validate atomically
 - **Locktime checks**: `tx.locktime < expr` for upper-bound time gates
 - **checkDataSig**: Schnorr signature verification for oracle data
 - **Self-bytecode continuation**: `tx.inputs[this.activeInputIndex].lockingBytecode` for covenant pattern
+- **CashTokens introspection**: `tokenCategory`, `tokenAmount` for fungible token validation
 
 ### Key Design Decisions
 - **Composable functions** separate from standalone — `composableSpend`, `composableCheck`, `composableVerify` enforce fewer output constraints for flexible multi-primitive transactions
 - **Oracle is stateless** — consumed and destroyed, create new UTXOs for repeated proofs
 - **Time-State uses absolute CLTV** (`tx.time`) not relative CSV — phases are calendar-based
 - **Miner fee hardcoded at 1000 sats** — hackathon simplification
+- **Zero runtime dependencies** — only `cashscript` as peer dependency
 
 ## Testing
 
 ```bash
-# Unit tests (33 tests, MockNetworkProvider)
+# Unit tests (42 tests, MockNetworkProvider)
 npm test
 
 # Run examples (MockNetworkProvider, no BCH needed)
-npx tsx examples/01-vault-basic.ts
+npx tsx examples/10-token-gated-dao.ts    # CashTokens flagship
 npx tsx examples/05-conditional-treasury.ts
 
 # Chipnet integration tests (requires funded keys)
@@ -218,6 +295,7 @@ npm run test:chipnet
 - **Crypto**: @bitauth/libauth (Schnorr signatures, hashing, address encoding)
 - **Testing**: Vitest + MockNetworkProvider (unit), Chipnet (integration)
 - **Runtime**: Node.js >= 18
+- **Package**: [cashblocks on npm](https://www.npmjs.com/package/cashblocks) (zero dependencies)
 
 ## Use Cases
 
@@ -227,6 +305,7 @@ npm run test:chipnet
 | Vesting Schedule | Vault + Time-State | Cliff period + monthly withdrawals |
 | Conditional Release | Vault + Oracle | Release funds when oracle confirms condition |
 | Governance Treasury | Vault + Time-State + Oracle | Time-gated, vote-verified treasury spend |
+| Token-Gated DAO | Vault + Time-State + Oracle + TokenGate | Governance tokens required to execute proposals (CashTokens) |
 | Salary Distribution | Time-State | Phase-based payment unlocking |
 | Price-Gated Spending | Oracle (payload constraint) | Only spend when oracle price meets threshold |
 

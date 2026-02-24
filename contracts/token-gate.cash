@@ -1,0 +1,40 @@
+pragma cashscript ^0.11.0;
+
+// TokenGate Primitive
+// A composable primitive that validates CashToken ownership before allowing spending.
+// Used to gate transactions based on fungible token balance.
+//
+// Use cases:
+// - DAO governance: require governance tokens to execute proposals
+// - Membership access: require minimum token balance to unlock features
+// - Token-weighted limits: tie spending power to token holdings
+//
+// Composition: In composed transactions, TokenGate verifies token ownership
+// and preserves tokens in a continuation output. Other primitives in the same TX
+// handle the actual spending logic (Vault), time gates (TimeState), and data (Oracle).
+
+contract TokenGate(bytes32 requiredCategory, int minTokenAmount) {
+
+    // Standalone: verify token ownership and allow full spend
+    function verifyTokenAndSpend(pubkey spenderPk, sig spenderSig) {
+        require(checkSig(spenderSig, spenderPk));
+
+        // Verify this UTXO carries the required fungible token
+        require(tx.inputs[this.activeInputIndex].tokenCategory == requiredCategory);
+        require(tx.inputs[this.activeInputIndex].tokenAmount >= minTokenAmount);
+    }
+
+    // Composable: verify token, preserve in continuation, allow composed TX
+    // continuationIndex: which output preserves the token gate UTXO
+    function composableVerify(int continuationIndex) {
+        // Verify input has required token
+        require(tx.inputs[this.activeInputIndex].tokenCategory == requiredCategory);
+        require(tx.inputs[this.activeInputIndex].tokenAmount >= minTokenAmount);
+
+        // Ensure tokens are preserved in continuation output (covenant)
+        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;
+        require(tx.outputs[continuationIndex].lockingBytecode == selfLocking);
+        require(tx.outputs[continuationIndex].tokenCategory == tx.inputs[this.activeInputIndex].tokenCategory);
+        require(tx.outputs[continuationIndex].tokenAmount >= tx.inputs[this.activeInputIndex].tokenAmount);
+    }
+}

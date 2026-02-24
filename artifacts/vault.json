@@ -1,0 +1,140 @@
+{
+  "contractName": "Vault",
+  "constructorInputs": [
+    {
+      "name": "ownerPk",
+      "type": "pubkey"
+    },
+    {
+      "name": "spendLimit",
+      "type": "int"
+    },
+    {
+      "name": "whitelistHash",
+      "type": "bytes20"
+    }
+  ],
+  "abi": [
+    {
+      "name": "partialSpend",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        },
+        {
+          "name": "spendAmount",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "fullSpend",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        }
+      ]
+    },
+    {
+      "name": "composableSpend",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type": "sig"
+        },
+        {
+          "name": "spendAmount",
+          "type": "int"
+        },
+        {
+          "name": "continuationIndex",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_3 OP_PICK OP_0 OP_GREATERTHAN OP_VERIFY OP_3 OP_PICK OP_GREATERTHANOREQUAL OP_VERIFY e803 OP_INPUTINDEX OP_UTXOVALUE OP_4 OP_PICK OP_SUB OP_SWAP OP_SUB 76a914 OP_ROT OP_CAT 88ac OP_CAT OP_0 OP_OUTPUTBYTECODE OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE OP_3 OP_ROLL OP_NUMEQUALVERIFY OP_INPUTINDEX OP_UTXOBYTECODE OP_OVER 2202 OP_GREATERTHAN OP_IF OP_1 OP_OUTPUTBYTECODE OP_OVER OP_EQUALVERIFY OP_1 OP_OUTPUTVALUE OP_2 OP_PICK OP_NUMEQUALVERIFY OP_ENDIF OP_2DROP OP_DROP OP_1 OP_ELSE OP_3 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY e803 OP_INPUTINDEX OP_UTXOVALUE OP_SWAP OP_SUB OP_DUP OP_0 OP_GREATERTHAN OP_VERIFY OP_DUP OP_ROT OP_LESSTHANOREQUAL OP_VERIFY 76a914 OP_ROT OP_CAT 88ac OP_CAT OP_0 OP_OUTPUTBYTECODE OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE OP_NUMEQUAL OP_NIP OP_ELSE OP_3 OP_ROLL OP_2 OP_NUMEQUALVERIFY OP_3 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_2 OP_PICK OP_0 OP_GREATERTHAN OP_VERIFY OP_2 OP_PICK OP_GREATERTHANOREQUAL OP_VERIFY OP_INPUTINDEX OP_UTXOVALUE OP_ROT OP_SUB OP_INPUTINDEX OP_UTXOBYTECODE OP_OVER 2202 OP_GREATERTHAN OP_IF OP_3 OP_PICK OP_OUTPUTBYTECODE OP_OVER OP_EQUALVERIFY OP_3 OP_PICK OP_OUTPUTVALUE OP_2 OP_PICK OP_GREATERTHANOREQUAL OP_VERIFY OP_ENDIF OP_2DROP OP_2DROP OP_1 OP_ENDIF OP_ENDIF",
+  "source": "pragma cashscript ^0.11.0;\n\n// Vault Primitive\n// A UTXO that stores funds with a spending policy (owner, limit, whitelist).\n// The vault enforces that:\n//   - Only the owner can spend\n//   - Each spend is within the spend limit\n//   - Funds go only to whitelisted destination\n//   - Remaining funds return to the same vault covenant\n\ncontract Vault(pubkey ownerPk, int spendLimit, bytes20 whitelistHash) {\n\n    // Spend up to spendLimit and send remainder back to the same vault.\n    // Output 0: whitelisted destination (spendAmount)\n    // Output 1: continuation vault (change)\n    function partialSpend(sig ownerSig, int spendAmount) {\n        require(checkSig(ownerSig, ownerPk));\n\n        require(spendAmount > 0);\n        require(spendAmount <= spendLimit);\n\n        int minerFee = 1000;\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int changeValue = inputValue - spendAmount - minerFee;\n\n        // Output 0: send to whitelisted P2PKH address\n        bytes25 whitelistLocking = new LockingBytecodeP2PKH(whitelistHash);\n        require(tx.outputs[0].lockingBytecode == whitelistLocking);\n        require(tx.outputs[0].value == spendAmount);\n\n        // Output 1: continuation vault with same locking bytecode (covenant)\n        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;\n        if (changeValue > 546) {\n            require(tx.outputs[1].lockingBytecode == selfLocking);\n            require(tx.outputs[1].value == changeValue);\n        }\n    }\n\n    // Drain the vault entirely when balance is within spendLimit.\n    function fullSpend(sig ownerSig) {\n        require(checkSig(ownerSig, ownerPk));\n\n        int minerFee = 1000;\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int spendAmount = inputValue - minerFee;\n\n        require(spendAmount > 0);\n        require(spendAmount <= spendLimit);\n\n        bytes25 whitelistLocking = new LockingBytecodeP2PKH(whitelistHash);\n        require(tx.outputs[0].lockingBytecode == whitelistLocking);\n        require(tx.outputs[0].value == spendAmount);\n    }\n\n    // For composed transactions with other primitives.\n    // Validates vault rules but allows flexible output index for continuation.\n    //\n    // SECURITY NOTE: This function intentionally does NOT enforce the whitelist\n    // destination. In composed transactions, output destinations are determined\n    // by the composition logic (e.g., other primitives may dictate where funds go).\n    // The vault still enforces: owner signature, spend limit, and covenant continuation.\n    // Use partialSpend/fullSpend for standalone transactions that need whitelist enforcement.\n    function composableSpend(sig ownerSig, int spendAmount, int continuationIndex) {\n        require(checkSig(ownerSig, ownerPk));\n\n        require(spendAmount > 0);\n        require(spendAmount <= spendLimit);\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int changeValue = inputValue - spendAmount;\n\n        // Continuation vault at caller-specified output index\n        bytes selfLocking = tx.inputs[this.activeInputIndex].lockingBytecode;\n        if (changeValue > 546) {\n            require(tx.outputs[continuationIndex].lockingBytecode == selfLocking);\n            require(tx.outputs[continuationIndex].value >= changeValue);\n        }\n    }\n}\n",
+  "debug": {
+    "bytecode": "5379009c63547a7cad537900a0695379a26902e803c0c65479947c940376a9147b7e0288ac7e00cd8800cc537a9dc0c778022202a06351cd788851cc52799d686d7551675379519c63547a7cad02e803c0c67c947600a069767ba1690376a9147b7e0288ac7e00cd8800cc9c7767537a529d537a7cad527900a0695279a269c0c67b94c0c778022202a0635379cd78885379cc5279a269686d6d516868",
+    "sourceMap": "16:4:37:5;;;;;17:25:17:33;;:35::42;:8::45:1;19:16:19:27:0;;:30::31;:16:::1;:8::33;20:16:20:27:0;;:::41:1;:8::43;22:23:22:27:0;23:35:23:56;:25::63:1;24:39:24:50:0;;:26:::1;:53::61:0;:26:::1;27:35:27:74:0;:60::73;:35::74:1;;;28:27:28:28:0;:16::45:1;:8::67;29:27:29:28:0;:16::35:1;:39::50:0;;:8::52:1;32:38:32:59:0;:28::76:1;33:12:33:23:0;:26::29;:12:::1;:31:36:9:0;34::34:32;:20::49:1;:53::64:0;:12::66:1;35:31:35:32:0;:20::39:1;:43::54:0;;:12::56:1;33:31:36:9;16:4:37:5;;;;40::53::0;;;;;41:25:41:33;;:35::42;:8::45:1;43:23:43:27:0;44:35:44:56;:25::63:1;45:39:45:47:0;:26:::1;47:16:47:27:0;:30::31;:16:::1;:8::33;48:16:48:27:0;:31::41;:16:::1;:8::43;50:35:50:74:0;:60::73;:35::74:1;;;51:27:51:28:0;:16::45:1;:8::67;52:27:52:28:0;:16::35:1;:8::52;40:4:53:5;;63::78::0;;;;64:25:64:33;;:35::42;:8::45:1;66:16:66:27:0;;:30::31;:16:::1;:8::33;67:16:67:27:0;;:::41:1;:8::43;69:35:69:56:0;:25::63:1;70:39:70:50:0;:26:::1;73:38:73:59:0;:28::76:1;74:12:74:23:0;:26::29;:12:::1;:31:77:9:0;75::75:48;;:20::65:1;:69::80:0;:12::82:1;76:31:76:48:0;;:20::55:1;:59::70:0;;:20:::1;:12::72;74:31:77:9;63:4:78:5;;;11:0:79:1;",
+    "logs": [],
+    "requires": [
+      {
+        "ip": 11,
+        "line": 17
+      },
+      {
+        "ip": 16,
+        "line": 19
+      },
+      {
+        "ip": 20,
+        "line": 20
+      },
+      {
+        "ip": 36,
+        "line": 28
+      },
+      {
+        "ip": 41,
+        "line": 29
+      },
+      {
+        "ip": 51,
+        "line": 34
+      },
+      {
+        "ip": 56,
+        "line": 35
+      },
+      {
+        "ip": 70,
+        "line": 41
+      },
+      {
+        "ip": 79,
+        "line": 47
+      },
+      {
+        "ip": 83,
+        "line": 48
+      },
+      {
+        "ip": 91,
+        "line": 51
+      },
+      {
+        "ip": 95,
+        "line": 52
+      },
+      {
+        "ip": 104,
+        "line": 64
+      },
+      {
+        "ip": 109,
+        "line": 66
+      },
+      {
+        "ip": 113,
+        "line": 67
+      },
+      {
+        "ip": 128,
+        "line": 75
+      },
+      {
+        "ip": 135,
+        "line": 76
+      }
+    ]
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.11.5"
+  },
+  "updatedAt": "2026-02-20T15:41:45.995Z"
+}

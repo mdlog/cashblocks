@@ -6,7 +6,6 @@ export interface VaultParams {
 
 export interface TimeStateParams {
   ownerPk: Uint8Array;
-  startTime: bigint;
   phase1Time: bigint;
   phase2Time: bigint;
 }
@@ -22,6 +21,11 @@ export interface OracleMessage {
   timestamp: bigint;
   nonce: bigint;
   payload: Uint8Array;
+}
+
+export interface TokenGateParams {
+  requiredCategory: Uint8Array;
+  minTokenAmount: bigint;
 }
 
 export enum TimePhase {

@@ -1,13 +1,29 @@
 {
   "name": "cashblocks",
-  "version": "0.1.0",
-  "description": "CashBlocks — Composable UTXO building blocks for Bitcoin Cash. Vault, Time-State, and Oracle Proof primitives.",
+  "version": "0.2.1",
+  "description": "CashBlocks — Composable UTXO building blocks for Bitcoin Cash. Vault, Time-State, Oracle Proof, and Token Gate primitives with CashTokens support.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
-    "compile:contracts": "cashc contracts/vault.cash --output artifacts/vault.json && cashc contracts/time-state.cash --output artifacts/time-state.json && cashc contracts/oracle-proof.cash --output artifacts/oracle-proof.json",
+    "prebuild": "npm run sync:artifacts",
+    "sync:artifacts": "cp artifacts/vault.json src/artifacts/vault.json && cp artifacts/time-state.json src/artifacts/time-state.json && cp artifacts/oracle-proof.json src/artifacts/oracle-proof.json && cp artifacts/token-gate.json src/artifacts/token-gate.json",
+    "compile:contracts": "cashc contracts/vault.cash --output artifacts/vault.json && cashc contracts/time-state.cash --output artifacts/time-state.json && cashc contracts/oracle-proof.cash --output artifacts/oracle-proof.json && cashc contracts/token-gate.cash --output artifacts/token-gate.json",
+    "compile:all": "npm run compile:contracts && npm run sync:artifacts",
+    "prepublishOnly": "npm run compile:all && npm run build && npm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "example:vault": "tsx examples/01-vault-basic.ts",
@@ -16,19 +32,57 @@
     "example:vesting": "tsx examples/04-vault-with-timelock.ts",
     "example:treasury": "tsx examples/05-conditional-treasury.ts",
     "example:vesting-schedule": "tsx examples/06-vesting-schedule.ts",
+    "example:dao": "tsx examples/07-dao-governance.ts",
+    "example:escrow": "tsx examples/08-defi-escrow.ts",
+    "example:insurance": "tsx examples/09-insurance-pool.ts",
+    "example:token-dao": "tsx examples/10-token-gated-dao.ts",
     "keys:generate": "tsx scripts/generate-keys.ts",
     "deploy:chipnet": "tsx scripts/deploy-chipnet.ts",
-    "test:chipnet": "tsx scripts/test-chipnet.ts"
+    "test:chipnet": "tsx scripts/test-chipnet.ts",
+    "web": "tsx web/server.ts",
+    "web:dev": "tsx watch web/server.ts"
   },
-  "dependencies": {
+  "keywords": [
+    "bitcoin-cash",
+    "bch",
+    "cashscript",
+    "utxo",
+    "smart-contract",
+    "defi",
+    "vault",
+    "oracle",
+    "covenant",
+    "composable",
+    "cashtokens"
+  ],
+  "author": "MDlabs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdlog/cashblocks.git"
+  },
+  "homepage": "https://github.com/mdlog/cashblocks#readme",
+  "bugs": {
+    "url": "https://github.com/mdlog/cashblocks/issues"
+  },
+  "peerDependencies": {
+    "cashscript": "^0.11.0"
+  },
+  "peerDependenciesMeta": {
+    "cashscript": {
+      "optional": false
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
     "cashc": "^0.11.0",
     "cashscript": "^0.11.0",
-    "unspent": "^0.2.19"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
+    "express": "^4.21.0",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0",
+    "unspent": "^0.2.19",
     "vitest": "^2.0.0"
   },
   "engines": {
