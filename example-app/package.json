@@ -15,6 +15,6 @@
     "@bitauth/libauth": "^3.1.0-next.8",
     "cashblocks": "^0.3.0",
     "cashscript": "^0.11.5",
-    "express": "^5.2.1"
+    "express": "^4.21.0"
   }
 }
