@@ -9,6 +9,7 @@ import {
   TransactionComposer,
   encodeOracleMessage,
   intToBytes4LE,
+  domainFromString,
 } from 'cashblocks';
 
 import { SignatureTemplate, TransactionBuilder } from 'cashscript';
@@ -20,7 +21,7 @@ import {
   waitForUtxos, waitForFundedUtxo, fundScenario, getOwnerBalance,
 } from './chipnet-helpers.mjs';
 
-const DOMAIN = new Uint8Array([0x43, 0x52, 0x45, 0x44]); // "CRED"
+const DOMAIN = domainFromString('CRED');
 
 /**
  * Run the full lending scenario on chipnet

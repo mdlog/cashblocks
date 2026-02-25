@@ -190,7 +190,13 @@ app.delete('/api/lending/session/:id', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  CashBlocks DeFi Protocol`);
-  console.log(`  http://localhost:${PORT}\n`);
-});
+// Export for Vercel serverless
+export default app;
+
+// Only listen when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n  CashBlocks DeFi Protocol`);
+    console.log(`  http://localhost:${PORT}\n`);
+  });
+}

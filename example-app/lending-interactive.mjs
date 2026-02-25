@@ -9,6 +9,7 @@ import {
   TransactionComposer,
   encodeOracleMessage,
   intToBytes4LE,
+  domainFromString,
 } from 'cashblocks';
 
 import {
@@ -41,7 +42,7 @@ export async function initializePool(config = {}, mode = 'chipnet', browserKeys 
   } = config;
 
   const sessionId = `pool-${++sessionCounter}-${Date.now()}`;
-  const DOMAIN = new Uint8Array([0x43, 0x52, 0x45, 0x44]); // "CRED"
+  const DOMAIN = domainFromString('CRED');
 
   return initChipnetPool(sessionId, { poolBalance, maxLoan, minCreditScore, DOMAIN, ownerLabel }, browserKeys);
 }

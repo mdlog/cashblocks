@@ -17,6 +17,7 @@ import {
   encodePrivateKeyWif,
   decodePrivateKeyWif,
 } from '@bitauth/libauth';
+import { DUST_LIMIT, HARDCODED_FEE } from 'cashblocks';
 
 export const EXPLORER_BASE = 'https://chipnet.chaingraph.cash/tx/';
 export const FAUCET_URL = 'https://tbch.googol.cash/';
@@ -237,7 +238,7 @@ export async function fundScenario(targets, ownerPriv, ownerAddress) {
 
   const totalBalance = ownerUtxos.reduce((sum, u) => sum + u.satoshis, 0n);
   const totalNeeded = targets.reduce((sum, t) => sum + t.amount, 0n);
-  const fee = 1000n;
+  const fee = HARDCODED_FEE;
 
   if (totalBalance < totalNeeded + fee) {
     throw new Error(
@@ -258,7 +259,7 @@ export async function fundScenario(targets, ownerPriv, ownerAddress) {
   }
 
   const change = totalBalance - totalNeeded - fee;
-  if (change > 546n) {
+  if (change > DUST_LIMIT) {
     builder.addOutput({ to: ownerAddress, amount: change });
   }
 
