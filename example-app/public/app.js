@@ -920,6 +920,7 @@
 
   var SESSION_STORAGE_KEY = 'cashblocks_lending_session';
   var DASH_CACHE_KEY = 'cashblocks_lending_dash_cache';
+  var HISTORY_CACHE_KEY = 'cashblocks_lending_history_cache';
 
   // ─── Pool Browser (in Lending Dashboard tab) ───
 
@@ -1042,6 +1043,7 @@
   function clearSavedSession() {
     localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem(DASH_CACHE_KEY);
+    localStorage.removeItem(HISTORY_CACHE_KEY);
   }
 
   function restoreFromCache(saved) {
@@ -1057,6 +1059,8 @@
       showActiveDashboard(dash);
       enableLendingTabs();
       updateBorrowForm(dash);
+      // Also restore cached history
+      loadHistoryFromCache();
       showToast('info', 'Session Restored', 'Showing cached pool data. Server session expired — create a new pool to transact.');
       return true;
     } catch (e) { return false; }
@@ -1636,9 +1640,25 @@
     fetch('/api/lending/history/' + lendingSession.sessionId)
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        renderHistoryTable(data.transactions || []);
+        if (data.error) {
+          loadHistoryFromCache();
+          return;
+        }
+        var txs = data.transactions || [];
+        renderHistoryTable(txs);
+        // Cache history
+        try { localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(txs)); } catch(e) {}
       })
-      .catch(function(err) { console.error('History load error:', err); });
+      .catch(function() { loadHistoryFromCache(); });
+  }
+
+  function loadHistoryFromCache() {
+    try {
+      var raw = localStorage.getItem(HISTORY_CACHE_KEY);
+      if (raw) {
+        renderHistoryTable(JSON.parse(raw));
+      }
+    } catch(e) {}
   }
 
   function renderHistoryTable(txs) {
