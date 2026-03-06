@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "server.mjs",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["public/**"]
+      }
     }
   ],
   "routes": [
