@@ -29,7 +29,7 @@ import {
   MockNetworkProvider,
   randomUtxo,
   SignatureTemplate,
-} from 'cashscript';
+} from './cashscript-bridge.mjs';
 import {
   secp256k1,
   generatePrivateKey,

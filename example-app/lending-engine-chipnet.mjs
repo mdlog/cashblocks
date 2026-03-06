@@ -12,7 +12,7 @@ import {
   domainFromString,
 } from 'cashblocks';
 
-import { SignatureTemplate, TransactionBuilder } from 'cashscript';
+import { SignatureTemplate, TransactionBuilder } from './cashscript-bridge.mjs';
 import { secp256k1, sha256, generatePrivateKey } from '@bitauth/libauth';
 
 import {

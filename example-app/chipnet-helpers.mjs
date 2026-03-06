@@ -7,7 +7,7 @@ import {
   ElectrumNetworkProvider,
   SignatureTemplate,
   TransactionBuilder,
-} from 'cashscript';
+} from './cashscript-bridge.mjs';
 import {
   secp256k1,
   generatePrivateKey,

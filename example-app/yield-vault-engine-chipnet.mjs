@@ -12,7 +12,7 @@ import {
   TransactionComposer,
 } from 'cashblocks';
 
-import { SignatureTemplate } from 'cashscript';
+import { SignatureTemplate } from './cashscript-bridge.mjs';
 
 import {
   loadKeys, hexToUint8, getProvider, EXPLORER_BASE, FAUCET_URL,

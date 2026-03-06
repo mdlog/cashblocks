@@ -14,7 +14,7 @@ import {
 
 import {
   SignatureTemplate,
-} from 'cashscript';
+} from './cashscript-bridge.mjs';
 
 import {
   secp256k1,
@@ -30,6 +30,39 @@ import {
 // ─── Session Store ───
 const sessions = new Map();
 let sessionCounter = 0;
+
+/**
+ * Some environments load multiple cashscript copies, which breaks
+ * SignatureTemplate instanceof checks inside contract argument encoding.
+ * Probe candidate classes and pick a compatible one for this session runtime.
+ */
+async function createCompatibleLenderSig(session, amount) {
+  const candidates = [{ label: 'bridge', Ctor: SignatureTemplate }];
+
+  try {
+    const localCashscript = await import('./node_modules/cashscript/dist/index.js');
+    const LocalSignatureTemplate = localCashscript?.SignatureTemplate;
+    if (LocalSignatureTemplate && LocalSignatureTemplate !== SignatureTemplate) {
+      candidates.push({ label: 'local-node_modules', Ctor: LocalSignatureTemplate });
+    }
+  } catch {
+    // Local copy is optional; bridge remains the primary source.
+  }
+
+  let lastErr = null;
+  for (const candidate of candidates) {
+    try {
+      const sig = new candidate.Ctor(session.owner.privKey);
+      // Probe against a sig-typed unlock arg to verify class compatibility.
+      session.pool.contract.unlock.composableSpend(sig, amount, 0n);
+      return sig;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+
+  throw lastErr || new Error('Unable to create compatible SignatureTemplate.');
+}
 
 // ─── Initialize Pool ───
 
@@ -221,7 +254,7 @@ async function executeChipnetLoan(session, amount, creditScore, borrowerLabel, l
     throw new Error('Helper UTXOs not available yet. Try again in a few seconds.');
   }
 
-  const lenderSig = new SignatureTemplate(owner.privKey);
+  const lenderSig = await createCompatibleLenderSig(session, amount);
   const newBalance = session.currentUtxo.satoshis - amount;
 
   const composer = new TransactionComposer(provider);
