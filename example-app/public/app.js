@@ -919,6 +919,7 @@
   window.runScenario = runScenario;
 
   var SESSION_STORAGE_KEY = 'cashblocks_lending_session';
+  var DASH_CACHE_KEY = 'cashblocks_lending_dash_cache';
 
   // ─── Pool Browser (in Lending Dashboard tab) ───
 
@@ -1026,16 +1027,39 @@
 
   // ─── Session Persistence ───
 
-  function saveSession() {
+  function saveSession(dashData) {
     if (lendingSession) {
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(lendingSession));
+      if (dashData) {
+        localStorage.setItem(DASH_CACHE_KEY, JSON.stringify(dashData));
+      }
     } else {
       localStorage.removeItem(SESSION_STORAGE_KEY);
+      localStorage.removeItem(DASH_CACHE_KEY);
     }
   }
 
   function clearSavedSession() {
     localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem(DASH_CACHE_KEY);
+  }
+
+  function restoreFromCache(saved) {
+    try {
+      var cached = localStorage.getItem(DASH_CACHE_KEY);
+      if (!cached) return false;
+      var dash = JSON.parse(cached);
+      if (!dash || !dash.sessionId) return false;
+      lendingSession = saved;
+      loanAttempts = [];
+      prevDashValues = {};
+      dash._cached = true;
+      showActiveDashboard(dash);
+      enableLendingTabs();
+      updateBorrowForm(dash);
+      showToast('info', 'Session Restored', 'Showing cached pool data. Server session expired — create a new pool to transact.');
+      return true;
+    } catch (e) { return false; }
   }
 
   function tryRestoreSession() {
@@ -1050,7 +1074,10 @@
         .then(function(r) { return r.json(); })
         .then(function(dash) {
           if (dash.error) {
-            clearSavedSession();
+            // Server session lost — try cached dashboard
+            if (!restoreFromCache(saved)) {
+              clearSavedSession();
+            }
             return;
           }
           lendingSession = saved;
@@ -1059,8 +1086,15 @@
           showActiveDashboard(dash);
           enableLendingTabs();
           updateBorrowForm(dash);
+          // Update cache with fresh data
+          saveSession(dash);
         })
-        .catch(function() { clearSavedSession(); });
+        .catch(function() {
+          // Network error — try cached dashboard
+          if (!restoreFromCache(saved)) {
+            clearSavedSession();
+          }
+        });
     } catch (e) { clearSavedSession(); }
   }
 
@@ -1159,12 +1193,12 @@
         return;
       }
       lendingSession = { sessionId: data.sessionId, mode: currentMode };
-      saveSession();
       loanAttempts = [];
       prevDashValues = {};
       showActiveDashboard(data.dashboard);
       enableLendingTabs();
       updateBorrowForm(data.dashboard);
+      saveSession(data.dashboard);
       showToast('success', 'Pool Initialized', satsToBch(poolBalance) + ' deployed');
       loadAvailablePools();
     })
@@ -1529,6 +1563,7 @@
       if (data.poolState) {
         updateDashboardCards(data.poolState);
         updateBorrowForm(data.poolState);
+        saveSession(data.poolState);
       }
     })
     .catch(function(err) {
