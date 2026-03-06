@@ -95,11 +95,11 @@
       .step-title { @apply font-semibold text-sm leading-relaxed; }
       .step-details { @apply grid gap-x-3 gap-y-0.5 mt-1.5 text-xs; grid-template-columns: auto 1fr; }
       .step-key { color: var(--text3); @apply font-medium; }
-      .step-val { color: var(--text2); @apply font-mono text-[0.6875rem] break-all; }
+      .step-val { color: var(--text2); @apply font-mono text-[0.8125rem] break-all; }
       .step-primitives { @apply flex gap-1 mt-1.5; }
 
       /* === PRIM TAGS (dynamic) === */
-      .prim-tag { @apply px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase tracking-wide; }
+      .prim-tag { @apply px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide; }
       .prim-tag.vault { background: var(--vault-bg); color: var(--vault); border: 1px solid rgba(30,64,175,0.2); }
       .prim-tag.timestate, .prim-tag.time-state { background: var(--timestate-bg); color: var(--timestate); border: 1px solid rgba(15,118,110,0.22); }
       .prim-tag.oracle, .prim-tag.oracleproof { background: var(--oracle-bg); color: var(--oracle); border: 1px solid rgba(185,28,28,0.22); }
@@ -108,14 +108,14 @@
       /* === SUMMARY === */
       .summary-grid { @apply grid gap-3; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
       .summary-item { @apply rounded-lg p-3.5; background: var(--bg2); border: 1px solid rgba(16,34,56,0.08); }
-      .summary-label { @apply text-[0.6875rem] uppercase tracking-wide font-medium; color: var(--text3); }
-      .summary-value { @apply text-[0.9375rem] font-bold font-mono mt-0.5; color: var(--text); }
+      .summary-label { @apply text-xs uppercase tracking-wide font-medium; color: var(--text3); }
+      .summary-value { @apply text-base font-bold font-mono mt-0.5; color: var(--text); }
       .exec-time { @apply text-xs mt-3 text-right font-mono; color: var(--text3); }
 
       /* === CODE VIEWER === */
       .code-header { @apply flex justify-between items-center px-5 py-2.5; background: var(--surface2); border-bottom: 1px solid rgba(16,34,56,0.08); }
       .code-title { @apply text-sm font-semibold; color: var(--text2); }
-      .copy-btn { @apply px-2.5 py-1 rounded text-[0.6875rem] font-medium cursor-pointer transition-all; background: var(--surface); border: 1px solid rgba(16,34,56,0.16); color: var(--text3); font-family: var(--font); }
+      .copy-btn { @apply px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition-all; background: var(--surface); border: 1px solid rgba(16,34,56,0.16); color: var(--text3); font-family: var(--font); }
       .copy-btn:hover { color: var(--accent); border-color: rgba(29,111,216,0.3); }
       .code-block { @apply px-5 py-5 font-mono text-sm leading-7 overflow-x-auto; color: #1f334d; tab-size: 2; }
       .spinner { @apply inline-block w-3.5 h-3.5 rounded-full mr-1.5 align-middle; border: 2px solid rgba(29,111,216,0.22); border-top-color: var(--accent); animation: spin 0.6s linear infinite; }
@@ -125,7 +125,7 @@
       .pool-browser-item:hover { border-color: rgba(29,111,216,0.2); background: rgba(29,111,216,0.04); box-shadow: 0 6px 16px rgba(16,34,56,0.08); }
       .pool-browser-info { @apply flex-1 min-w-0; }
       .pool-browser-owner { @apply text-sm font-bold mb-1; color: var(--text); }
-      .pool-browser-stats { @apply flex gap-3 text-[0.7rem] font-mono; color: var(--text3); }
+      .pool-browser-stats { @apply flex gap-3 text-xs font-mono; color: var(--text3); }
       .pool-browser-util { @apply font-semibold; color: var(--accent); }
       .pool-browser-join { @apply px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all whitespace-nowrap shrink-0; background: linear-gradient(135deg, rgba(29,111,216,0.15), rgba(29,111,216,0.08)); border: 1px solid rgba(29,111,216,0.3); color: var(--accent); font-family: var(--font); }
       .pool-browser-join:hover { background: linear-gradient(135deg, rgba(29,111,216,0.24), rgba(29,111,216,0.14)); border-color: var(--accent); box-shadow: 0 2px 8px rgba(29,111,216,0.18); transform: translateY(-1px); }
@@ -149,7 +149,7 @@
       .attempt-rejected .attempt-status { color: var(--red); }
       .attempt-amount { @apply font-mono font-semibold; color: var(--text); }
       .attempt-score { color: var(--text2); }
-      .attempt-detail { @apply font-mono text-[0.6875rem] overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0; color: var(--text3); }
+      .attempt-detail { @apply font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0; color: var(--text3); }
 
       /* === RECENT ACTIVITY === */
       .recent-item { @apply flex items-center gap-3 rounded-lg text-xs; padding: 0.6rem 0.85rem; background: var(--bg2); border: 1px solid rgba(16,34,56,0.08); animation: stepIn 0.3s ease; transition: border-color 0.2s; }
@@ -158,18 +158,18 @@
       .recent-status-dot.dot-success { background: var(--green); box-shadow: 0 0 4px var(--green); }
       .recent-status-dot.dot-rejected { background: var(--red); box-shadow: 0 0 4px var(--red); }
       .recent-amount { @apply font-mono font-semibold; color: var(--text); }
-      .recent-time { @apply text-[0.65rem] ml-auto; color: var(--text3); }
+      .recent-time { @apply text-xs ml-auto; color: var(--text3); }
 
       /* === HISTORY TABLE === */
       .history-row td { @apply px-4 py-3; border-bottom: 1px solid rgba(16,34,56,0.06); }
       .history-row:nth-child(even) td { background: rgba(16,34,56,0.02); }
       .history-row:hover td { background: rgba(29,111,216,0.08) !important; }
-      .history-status { @apply px-3 py-1 rounded-full text-[0.6875rem] font-semibold uppercase inline-flex items-center gap-1; }
+      .history-status { @apply px-3 py-1 rounded-full text-xs font-semibold uppercase inline-flex items-center gap-1; }
       .status-success { background: rgba(21,128,61,0.1); color: var(--green); border: 1px solid rgba(21,128,61,0.25); }
       .status-rejected { background: rgba(198,40,40,0.1); color: var(--red); border: 1px solid rgba(198,40,40,0.25); }
       .txid-cell { @apply flex items-center gap-1.5; }
-      .txid-mono { @apply font-mono text-[0.7rem]; color: var(--text3); }
-      .copy-txid-btn { @apply px-2 py-1 rounded-md text-[0.65rem] cursor-pointer shrink-0 leading-none transition-all; background: var(--surface2); border: 1px solid rgba(16,34,56,0.16); color: var(--text3); font-family: var(--font); }
+      .txid-mono { @apply font-mono text-xs; color: var(--text3); }
+      .copy-txid-btn { @apply px-2 py-1 rounded-md text-xs cursor-pointer shrink-0 leading-none transition-all; background: var(--surface2); border: 1px solid rgba(16,34,56,0.16); color: var(--text3); font-family: var(--font); }
       .copy-txid-btn:hover { color: var(--accent); border-color: rgba(29,111,216,0.3); background: rgba(29,111,216,0.06); }
       .text-muted { color: var(--text3); }
 
@@ -184,7 +184,7 @@
 
       /* === WALLET === */
       .wallet-addr-value { @apply text-xs font-mono break-all leading-relaxed select-all cursor-text; color: var(--text); }
-      .wallet-hint { @apply text-sm; color: var(--text3); }
+      .wallet-hint { @apply text-base; color: var(--text3); }
       #wallet-trigger.wallet-active { @apply border-ok/30 text-ok; box-shadow: 0 0 8px rgba(21,128,61,0.16); }
 
       /* === VALUE PULSE === */
@@ -259,7 +259,7 @@
     .score-slider::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; background: #ffffff; border: 3px solid #ffffff; cursor: pointer; box-shadow: 0 2px 8px rgba(16,34,56,0.22), 0 0 0 4px rgba(255,255,255,0.92); }
 
     /* Score Tooltip */
-    .score-tooltip { position: absolute; top: -32px; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; font-family: var(--mono); color: #fff; white-space: nowrap; pointer-events: none; transform: translateX(-50%); transition: left 0.05s ease-out; z-index: 5; }
+    .score-tooltip { position: absolute; top: -32px; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.875rem; font-weight: 800; font-family: var(--mono); color: #fff; white-space: nowrap; pointer-events: none; transform: translateX(-50%); transition: left 0.05s ease-out; z-index: 5; }
     .score-tooltip::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid currentColor; }
     .score-tooltip.score-low { background: var(--red); color: var(--red); }
     .score-tooltip.score-low::after { border-top-color: var(--red); }
@@ -367,24 +367,24 @@
         <a href="#sdk" class="nav-link px-3.5 py-1.5 rounded-md text-sm font-medium text-txt-3 no-underline transition-all hover:text-txt-2 hover:bg-surface">SDK</a>
       </nav>
       <div class="flex gap-2 items-center">
-        <button type="button" id="wallet-trigger" class="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-[0.75rem] font-semibold bg-surface border border-white/10 text-txt-2 cursor-pointer transition-all hover:border-ok/30 hover:text-ok">
+        <button type="button" id="wallet-trigger" class="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-surface border border-white/10 text-txt-2 cursor-pointer transition-all hover:border-ok/30 hover:text-ok">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
           <span id="wallet-trigger-label">Wallet</span>
-          <span id="wallet-trigger-balance" class="hidden font-mono text-ok text-[0.7rem]"></span>
+          <span id="wallet-trigger-balance" class="hidden font-mono text-ok text-xs"></span>
           <svg class="w-3 h-3 transition-transform wallet-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l3 3 3-3"/></svg>
         </button>
         <div class="flex bg-surface border border-white/10 rounded-full p-0.5 gap-0.5">
-          <button class="mode-btn active px-3 py-1 border-none rounded-full text-[0.6875rem] font-semibold cursor-pointer transition-all text-txt-3 bg-transparent" data-mode="chipnet">Chipnet</button>
+          <button class="mode-btn active px-3 py-1 border-none rounded-full text-xs font-semibold cursor-pointer transition-all text-txt-3 bg-transparent" data-mode="chipnet">Chipnet</button>
         </div>
-        <span class="badge badge-net flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold bg-surface border border-ok/20 text-ok" id="badge-net">
+        <span class="badge badge-net flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface border border-ok/20 text-ok" id="badge-net">
           <span class="badge-dot w-1.5 h-1.5 rounded-full bg-ok" style="box-shadow:0 0 6px var(--green)"></span>
           <span id="badge-net-text">Testnet</span>
         </span>
-        <span class="badge badge-server flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold bg-surface border border-white/10 text-txt-3 transition-all" id="badge-server">
+        <span class="badge badge-server flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface border border-white/10 text-txt-3 transition-all" id="badge-server">
           <span class="badge-dot w-1.5 h-1.5 rounded-full bg-ok" id="server-dot" style="box-shadow:0 0 6px var(--green)"></span>
           <span id="server-status-text">Checking...</span>
         </span>
-        <span class="hidden sm:flex items-center px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold bg-surface border border-accent/20 text-accent">v1.0</span>
+        <span class="hidden sm:flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface border border-accent/20 text-accent">v1.0</span>
       </div>
     </div>
   </header>
@@ -395,7 +395,7 @@
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <span class="text-sm font-bold tracking-tight">Chipnet Wallet</span>
-          <span class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold bg-ok/[0.08] border border-ok/20 text-ok">
+          <span class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold bg-ok/[0.08] border border-ok/20 text-ok">
             <span class="w-1 h-1 rounded-full bg-ok" style="box-shadow:0 0 4px var(--green)"></span>
             Live
           </span>
@@ -404,57 +404,57 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <!-- Keys Card -->
         <div class="bg-surface border border-white/[0.06] rounded-xl p-4" id="wallet-keys-card">
-          <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Keys</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Keys</div>
           <div id="wallet-keys-content">
             <div id="wallet-no-keys">
               <p class="wallet-hint">Generate or import keys to begin</p>
               <div class="flex gap-2 flex-wrap mt-3">
-                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer transition-all" id="btn-generate-keys" style="background:linear-gradient(135deg,var(--accent),var(--accent2))">Generate Keys</button>
-                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface" id="btn-import-chipnet-json">Import JSON</button>
+                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white cursor-pointer transition-all" id="btn-generate-keys" style="background:linear-gradient(135deg,var(--accent),var(--accent2))">Generate Keys</button>
+                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-sm font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface" id="btn-import-chipnet-json">Import JSON</button>
                 <input type="file" id="import-chipnet-json-file" accept=".json" style="display:none">
               </div>
             </div>
             <div id="wallet-has-keys" style="display:none">
               <div class="flex flex-col gap-0.5 mb-2 p-2 bg-base-light border border-white/[0.06] rounded-md">
-                <span class="text-[0.6875rem] text-txt-3 font-semibold uppercase tracking-wide">Owner</span>
+                <span class="text-xs text-txt-3 font-semibold uppercase tracking-wide">Owner</span>
                 <span class="wallet-addr-value" id="wallet-owner-addr"></span>
               </div>
               <div class="flex flex-col gap-0.5 mb-2 p-2 bg-base-light border border-white/[0.06] rounded-md">
-                <span class="text-[0.6875rem] text-txt-3 font-semibold uppercase tracking-wide">Recipient</span>
+                <span class="text-xs text-txt-3 font-semibold uppercase tracking-wide">Recipient</span>
                 <span class="wallet-addr-value" id="wallet-recipient-addr"></span>
               </div>
               <div class="flex flex-col gap-0.5 mb-2 p-2 bg-base-light border border-white/[0.06] rounded-md">
-                <span class="text-[0.6875rem] text-txt-3 font-semibold uppercase tracking-wide">Oracle</span>
+                <span class="text-xs text-txt-3 font-semibold uppercase tracking-wide">Oracle</span>
                 <span class="wallet-addr-value" id="wallet-oracle-addr"></span>
               </div>
               <div class="flex gap-2 flex-wrap mt-2">
-                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface" id="btn-download-chipnet-keys">Download Keys</button>
-                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-err border border-err/30 rounded-lg text-xs font-medium cursor-pointer transition-all hover:bg-err/[0.08]" id="btn-delete-keys">Delete Keys</button>
+                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-sm font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface" id="btn-download-chipnet-keys">Download Keys</button>
+                <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-err border border-err/30 rounded-lg text-sm font-medium cursor-pointer transition-all hover:bg-err/[0.08]" id="btn-delete-keys">Delete Keys</button>
               </div>
             </div>
           </div>
         </div>
         <!-- Balance Card -->
         <div class="bg-surface border border-white/[0.06] rounded-xl p-4" id="wallet-balance-card">
-          <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Balances</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Balances</div>
           <div class="flex items-baseline justify-between gap-2 py-1.5 border-b border-white/[0.06]">
-            <span class="text-[0.7rem] font-semibold uppercase tracking-wide text-txt-3">Owner</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-txt-3">Owner</span>
             <span class="balance-gradient text-base font-extrabold font-mono tracking-tight text-right" id="wallet-balance-owner">&mdash;</span>
           </div>
           <div class="flex items-baseline justify-between gap-2 py-1.5 border-b border-white/[0.06]">
-            <span class="text-[0.7rem] font-semibold uppercase tracking-wide text-txt-3">Recipient</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-txt-3">Recipient</span>
             <span class="balance-gradient text-base font-extrabold font-mono tracking-tight text-right" id="wallet-balance-recipient">&mdash;</span>
           </div>
           <div class="flex items-baseline justify-between gap-2 py-1.5">
-            <span class="text-[0.7rem] font-semibold uppercase tracking-wide text-txt-3">Oracle</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-txt-3">Oracle</span>
             <span class="balance-gradient text-base font-extrabold font-mono tracking-tight text-right" id="wallet-balance-oracle">&mdash;</span>
           </div>
           <div class="text-xs text-txt-3 mt-1 font-mono" id="wallet-utxo-count"></div>
-          <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface mt-2" id="btn-refresh-balance">Refresh All</button>
+          <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-sm font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface mt-2" id="btn-refresh-balance">Refresh All</button>
         </div>
         <!-- Fund Card -->
         <div class="bg-surface border border-white/[0.06] rounded-xl p-4" id="wallet-fund-card">
-          <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Fund via Faucet</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-txt-3 mb-2.5">Fund via Faucet</div>
           <div id="wallet-qr" class="flex justify-center min-h-[60px] items-center"></div>
           <a href="https://tbch.googol.cash/" target="_blank" rel="noopener" class="btn-press inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-transparent text-txt-2 border border-white/10 rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface mt-2 no-underline w-full text-center">Open Faucet</a>
         </div>
@@ -484,22 +484,22 @@
         <div class="bg-surface border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:bg-surface-2">
           <div class="stat-value-gradient text-3xl font-extrabold tracking-tight leading-none mb-1.5">4</div>
           <div class="text-sm font-semibold mb-0.5">Primitives</div>
-          <div class="text-[0.6875rem] text-txt-3">Vault + Time + Oracle + Token</div>
+          <div class="text-xs text-txt-3">Vault + Time + Oracle + Token</div>
         </div>
         <div class="bg-surface border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:bg-surface-2">
           <div class="stat-value-gradient text-3xl font-extrabold tracking-tight leading-none mb-1.5" id="metricBlocked">0</div>
           <div class="text-sm font-semibold mb-0.5">Attacks Blocked</div>
-          <div class="text-[0.6875rem] text-txt-3">On-chain enforcement</div>
+          <div class="text-xs text-txt-3">On-chain enforcement</div>
         </div>
         <div class="bg-surface border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:bg-surface-2">
           <div class="stat-value-gradient text-3xl font-extrabold tracking-tight leading-none mb-1.5" id="metricProcessed">0</div>
           <div class="text-sm font-semibold mb-0.5">TX Processed</div>
-          <div class="text-[0.6875rem] text-txt-3">Atomic composition</div>
+          <div class="text-xs text-txt-3">Atomic composition</div>
         </div>
         <div class="bg-surface border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:bg-surface-2">
           <div class="stat-value-gradient text-3xl font-extrabold tracking-tight leading-none mb-1.5">4</div>
           <div class="text-sm font-semibold mb-0.5">DeFi Protocols</div>
-          <div class="text-[0.6875rem] text-txt-3">Lend + DAO + Yield + Insurance</div>
+          <div class="text-xs text-txt-3">Lend + DAO + Yield + Insurance</div>
         </div>
       </div>
     </div>
@@ -512,14 +512,14 @@
 
       <!-- Sidebar -->
       <aside class="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible lg:sticky lg:top-[84px] lg:self-start pb-2 lg:pb-0">
-        <div class="hidden lg:block text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3 px-3 py-2">Protocols</div>
+        <div class="hidden lg:block text-xs font-semibold uppercase tracking-wider text-txt-3 px-3 py-2">Protocols</div>
         <button class="sidebar-item active flex items-center gap-3 px-3 py-2.5 bg-transparent border border-transparent rounded-lg cursor-pointer transition-all text-left text-txt-2 w-auto lg:w-full whitespace-nowrap lg:whitespace-normal" data-scenario="lending">
           <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style="background:var(--vault-bg);color:var(--vault)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
           <div class="flex flex-row lg:flex-col gap-1 lg:gap-0 items-center lg:items-start">
             <span class="text-sm font-semibold leading-tight">Lending Pool</span>
-            <span class="hidden lg:inline text-[0.6875rem] text-txt-3">4 primitives</span>
+            <span class="hidden lg:inline text-xs text-txt-3">4 primitives</span>
           </div>
         </button>
         <button class="sidebar-item flex items-center gap-3 px-3 py-2.5 bg-transparent border border-transparent rounded-lg cursor-pointer transition-all text-left text-txt-2 w-auto lg:w-full whitespace-nowrap lg:whitespace-normal" data-scenario="governance">
@@ -528,7 +528,7 @@
           </div>
           <div class="flex flex-row lg:flex-col gap-1 lg:gap-0 items-center lg:items-start">
             <span class="text-sm font-semibold leading-tight">DAO Governance</span>
-            <span class="hidden lg:inline text-[0.6875rem] text-txt-3">4 primitives</span>
+            <span class="hidden lg:inline text-xs text-txt-3">4 primitives</span>
           </div>
         </button>
         <button class="sidebar-item flex items-center gap-3 px-3 py-2.5 bg-transparent border border-transparent rounded-lg cursor-pointer transition-all text-left text-txt-2 w-auto lg:w-full whitespace-nowrap lg:whitespace-normal" data-scenario="yield-vault">
@@ -537,7 +537,7 @@
           </div>
           <div class="flex flex-row lg:flex-col gap-1 lg:gap-0 items-center lg:items-start">
             <span class="text-sm font-semibold leading-tight">Yield Vault</span>
-            <span class="hidden lg:inline text-[0.6875rem] text-txt-3">3 primitives</span>
+            <span class="hidden lg:inline text-xs text-txt-3">3 primitives</span>
           </div>
         </button>
         <button class="sidebar-item flex items-center gap-3 px-3 py-2.5 bg-transparent border border-transparent rounded-lg cursor-pointer transition-all text-left text-txt-2 w-auto lg:w-full whitespace-nowrap lg:whitespace-normal" data-scenario="insurance">
@@ -546,7 +546,7 @@
           </div>
           <div class="flex flex-row lg:flex-col gap-1 lg:gap-0 items-center lg:items-start">
             <span class="text-sm font-semibold leading-tight">Insurance Pool</span>
-            <span class="hidden lg:inline text-[0.6875rem] text-txt-3">4 primitives</span>
+            <span class="hidden lg:inline text-xs text-txt-3">4 primitives</span>
           </div>
         </button>
         <div class="hidden lg:block h-px bg-white/[0.06] mx-3 my-2"></div>
@@ -557,7 +557,7 @@
           </div>
           <div class="flex flex-row lg:flex-col gap-1 lg:gap-0 items-center lg:items-start">
             <span class="text-sm font-semibold leading-tight">SDK Code</span>
-            <span class="hidden lg:inline text-[0.6875rem] text-txt-3">Examples</span>
+            <span class="hidden lg:inline text-xs text-txt-3">Examples</span>
           </div>
         </button>
       </aside>
@@ -626,45 +626,45 @@
                       <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(30,64,175,0.1)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--vault)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       </div>
-                      <label class="text-xs font-semibold text-txt-2 uppercase tracking-wide" for="init-pool-balance">Pool Balance</label>
+                      <label class="text-sm font-semibold text-txt-2 uppercase tracking-wide" for="init-pool-balance">Pool Balance</label>
                     </div>
                     <div class="relative flex items-center">
                       <input type="number" id="init-pool-balance" class="w-full pr-14 text-xl h-12 rounded-lg bg-base border border-white/10 text-txt font-mono outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_rgba(29,111,216,0.15)]" style="padding:0.55rem 3.5rem 0.55rem 0.75rem" value="5000000" min="10000">
                       <span class="absolute right-3 text-xs font-semibold text-txt-3 pointer-events-none font-mono">sats</span>
                     </div>
-                    <div class="text-[0.65rem] text-txt-3 mt-2 leading-relaxed">Total liquidity deployed into the pool contract</div>
+                    <div class="text-sm text-txt-3 mt-2 leading-relaxed">Total liquidity deployed into the pool contract</div>
                   </div>
                   <div class="bg-base-light/50 border border-white/[0.06] rounded-xl p-4 transition-all hover:border-white/10">
                     <div class="flex items-center gap-2 mb-3">
                       <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(29,111,216,0.1)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                       </div>
-                      <label class="text-xs font-semibold text-txt-2 uppercase tracking-wide" for="init-max-loan">Max Loan</label>
+                      <label class="text-sm font-semibold text-txt-2 uppercase tracking-wide" for="init-max-loan">Max Loan</label>
                     </div>
                     <div class="relative flex items-center">
                       <input type="number" id="init-max-loan" class="w-full pr-14 text-xl h-12 rounded-lg bg-base border border-white/10 text-txt font-mono outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_rgba(29,111,216,0.15)]" style="padding:0.55rem 3.5rem 0.55rem 0.75rem" value="500000" min="1000">
                       <span class="absolute right-3 text-xs font-semibold text-txt-3 pointer-events-none font-mono">sats</span>
                     </div>
-                    <div class="text-[0.65rem] text-txt-3 mt-2 leading-relaxed">Maximum single loan enforced by Vault spend limit</div>
+                    <div class="text-sm text-txt-3 mt-2 leading-relaxed">Maximum single loan enforced by Vault spend limit</div>
                   </div>
                   <div class="bg-base-light/50 border border-white/[0.06] rounded-xl p-4 transition-all hover:border-white/10">
                     <div class="flex items-center gap-2 mb-3">
                       <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(185,28,28,0.1)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--oracle)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                       </div>
-                      <label class="text-xs font-semibold text-txt-2 uppercase tracking-wide" for="init-min-score">Min Score</label>
+                      <label class="text-sm font-semibold text-txt-2 uppercase tracking-wide" for="init-min-score">Min Score</label>
                     </div>
                     <div class="relative flex items-center">
                       <input type="number" id="init-min-score" class="w-full pr-14 text-xl h-12 rounded-lg bg-base border border-white/10 text-txt font-mono outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_rgba(29,111,216,0.15)]" style="padding:0.55rem 3.5rem 0.55rem 0.75rem" value="50" min="0" max="100">
                       <span class="absolute right-3 text-xs font-semibold text-txt-3 pointer-events-none font-mono">/100</span>
                     </div>
-                    <div class="text-[0.65rem] text-txt-3 mt-2 leading-relaxed">Minimum credit score verified by Oracle proof</div>
+                    <div class="text-sm text-txt-3 mt-2 leading-relaxed">Minimum credit score verified by Oracle proof</div>
                   </div>
                 </div>
                 <!-- Separator + info banner -->
                 <div class="flex items-center gap-3 my-5">
                   <div class="flex-1 h-px bg-white/[0.06]"></div>
-                  <span class="text-[0.6rem] text-txt-3 uppercase tracking-widest font-medium">4 Primitives</span>
+                  <span class="text-[0.7rem] text-txt-3 uppercase tracking-widest font-medium">4 Primitives</span>
                   <div class="flex-1 h-px bg-white/[0.06]"></div>
                 </div>
                 <div class="flex items-center gap-2.5 mb-4 px-3.5 py-2.5 rounded-lg text-xs text-txt-2" style="background:rgba(29,111,216,0.04);border:1px solid rgba(29,111,216,0.1)">
@@ -688,7 +688,7 @@
                   </div>
                   <div>
                     <div class="text-sm font-semibold text-txt">Available Pools</div>
-                    <div class="text-[0.65rem] text-txt-3">Browse and join other lending pools</div>
+                    <div class="text-xs text-txt-3">Browse and join other lending pools</div>
                   </div>
                 </div>
                 <button type="button" class="btn-press inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 text-txt-2 border border-white/10 rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-txt hover:bg-surface-3" id="btn-refresh-pools-dash">
@@ -715,33 +715,33 @@
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
                 <div class="bg-base-light border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl group">
                   <div class="flex items-center justify-between mb-3">
-                    <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3">Pool Balance</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-txt-3">Pool Balance</div>
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity" style="background:rgba(30,64,175,0.1)">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--vault)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                   </div>
                   <div class="balance-gradient text-2xl font-extrabold font-mono tracking-tight leading-tight" id="dash-pool-balance">0.00000000</div>
-                  <div class="text-[0.6875rem] text-txt-3 mt-1">BCH</div>
+                  <div class="text-xs text-txt-3 mt-1">BCH</div>
                 </div>
                 <div class="bg-base-light border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl group">
                   <div class="flex items-center justify-between mb-3">
-                    <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3">Remaining</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-txt-3">Remaining</div>
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity" style="background:rgba(29,111,216,0.1)">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
                   </div>
                   <div class="balance-gradient text-2xl font-extrabold font-mono tracking-tight leading-tight" id="dash-remaining">0.00000000</div>
-                  <div class="text-[0.6875rem] text-txt-3 mt-1">BCH</div>
+                  <div class="text-xs text-txt-3 mt-1">BCH</div>
                 </div>
                 <div class="bg-base-light border border-white/[0.06] rounded-xl p-5 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl group">
                   <div class="flex items-center justify-between mb-3">
-                    <div class="text-[0.6875rem] font-semibold uppercase tracking-wider text-txt-3">Loans Processed</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-txt-3">Loans Processed</div>
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity" style="background:rgba(34,211,238,0.1)">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--timestate)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </div>
                   </div>
                   <div class="balance-gradient text-2xl font-extrabold font-mono tracking-tight leading-tight" id="dash-tx-count">0</div>
-                  <div class="text-[0.6875rem] text-txt-3 mt-1">transactions</div>
+                  <div class="text-xs text-txt-3 mt-1">transactions</div>
                 </div>
               </div>
 
@@ -756,7 +756,7 @@
                     </svg>
                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                       <div class="text-2xl font-extrabold font-mono leading-none" id="ring-pct">0%</div>
-                      <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mt-1">Utilized</div>
+                      <div class="text-xs text-txt-3 uppercase tracking-wide mt-1">Utilized</div>
                     </div>
                   </div>
                   <div class="flex-1 min-w-0 text-center sm:text-left">
@@ -768,11 +768,11 @@
                     <div class="grid grid-cols-2 gap-4 mt-4">
                       <div class="bg-surface/50 rounded-lg p-3 border border-white/[0.04]">
                         <span class="text-lg font-bold font-mono" id="ring-lent">0</span>
-                        <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mt-0.5">Lent Out</div>
+                        <div class="text-xs text-txt-3 uppercase tracking-wide mt-0.5">Lent Out</div>
                       </div>
                       <div class="bg-surface/50 rounded-lg p-3 border border-white/[0.04]">
                         <span class="text-lg font-bold font-mono" id="ring-available">0</span>
-                        <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mt-0.5">Available</div>
+                        <div class="text-xs text-txt-3 uppercase tracking-wide mt-0.5">Available</div>
                       </div>
                     </div>
                   </div>
@@ -786,8 +786,8 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                   </div>
                   <div class="min-w-0">
-                    <div class="text-[0.6rem] text-txt-3 uppercase tracking-wide font-medium">Max Loan</div>
-                    <div class="font-semibold font-mono text-[0.75rem] text-txt truncate" id="dash-max-loan">&mdash;</div>
+                    <div class="text-[0.7rem] text-txt-3 uppercase tracking-wide font-medium">Max Loan</div>
+                    <div class="font-semibold font-mono text-sm text-txt truncate" id="dash-max-loan">&mdash;</div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2 px-3.5 py-2.5 bg-surface border border-white/[0.06] rounded-xl transition-all hover:border-white/10">
@@ -795,8 +795,8 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--oracle)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                   </div>
                   <div class="min-w-0">
-                    <div class="text-[0.6rem] text-txt-3 uppercase tracking-wide font-medium">Min Score</div>
-                    <div class="font-semibold font-mono text-[0.75rem] text-txt truncate" id="dash-min-score">&mdash;</div>
+                    <div class="text-[0.7rem] text-txt-3 uppercase tracking-wide font-medium">Min Score</div>
+                    <div class="font-semibold font-mono text-sm text-txt truncate" id="dash-min-score">&mdash;</div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2 px-3.5 py-2.5 bg-surface border border-white/[0.06] rounded-xl transition-all hover:border-white/10">
@@ -804,8 +804,8 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--timestate)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   </div>
                   <div class="min-w-0">
-                    <div class="text-[0.6rem] text-txt-3 uppercase tracking-wide font-medium">Mode</div>
-                    <div class="font-semibold font-mono text-[0.75rem] text-txt truncate" id="dash-mode">&mdash;</div>
+                    <div class="text-[0.7rem] text-txt-3 uppercase tracking-wide font-medium">Mode</div>
+                    <div class="font-semibold font-mono text-sm text-txt truncate" id="dash-mode">&mdash;</div>
                   </div>
                 </div>
               </div>
@@ -819,7 +819,7 @@
                 <div class="p-3 flex flex-col gap-1.5" id="recent-list"></div>
               </div>
 
-              <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-err border border-err/30 rounded-lg text-xs font-medium cursor-pointer transition-all hover:bg-err/[0.08] mt-5" id="btn-destroy-pool">
+              <button type="button" class="btn-press inline-flex items-center gap-2 px-3.5 py-1.5 bg-transparent text-err border border-err/30 rounded-lg text-sm font-medium cursor-pointer transition-all hover:bg-err/[0.08] mt-5" id="btn-destroy-pool">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Destroy Pool
               </button>
@@ -854,48 +854,48 @@
                 <!-- Recipient card -->
                 <div class="bg-base-light/50 border border-white/[0.06] rounded-xl p-4 mb-3">
                   <div class="flex items-center justify-between mb-2">
-                    <label class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider" for="loan-recipient">Recipient Address</label>
-                    <button type="button" class="btn-press inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface/50 text-txt-3 border border-white/[0.06] rounded-md text-[0.65rem] font-medium cursor-pointer transition-all hover:text-accent hover:border-accent/20 shrink-0" id="btn-use-my-address">
+                    <label class="text-sm font-semibold text-txt-3 uppercase tracking-wider" for="loan-recipient">Recipient Address</label>
+                    <button type="button" class="btn-press inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface/50 text-txt-3 border border-white/[0.06] rounded-md text-xs font-medium cursor-pointer transition-all hover:text-accent hover:border-accent/20 shrink-0" id="btn-use-my-address">
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       My Address
                     </button>
                   </div>
                   <input type="text" id="loan-recipient" class="w-full h-[42px] rounded-lg bg-base border border-white/[0.04] text-txt font-mono text-sm outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_rgba(29,111,216,0.15)] px-3" placeholder="bchtest:qz..." spellcheck="false">
-                  <div class="text-[0.65rem] text-txt-3 mt-1.5 font-mono" id="recipient-hint">Enter the BCH address to receive loan funds</div>
-                  <div class="text-[0.65rem] text-err mt-1 min-h-[0.875rem]" id="recipient-error-msg"></div>
+                  <div class="text-xs text-txt-3 mt-1.5 font-mono" id="recipient-hint">Enter the BCH address to receive loan funds</div>
+                  <div class="text-xs text-err mt-1 min-h-[0.875rem]" id="recipient-error-msg"></div>
                 </div>
 
                 <!-- Amount card -->
                 <div class="bg-base-light/50 border border-white/[0.06] rounded-xl p-4 mb-3">
                   <div class="flex items-center justify-between mb-2">
-                    <label class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider" for="loan-amount">Loan Amount</label>
+                    <label class="text-sm font-semibold text-txt-3 uppercase tracking-wider" for="loan-amount">Loan Amount</label>
                     <div class="flex gap-1">
-                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-[0.65rem] font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="25">25%</button>
-                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-[0.65rem] font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="50">50%</button>
-                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-[0.65rem] font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="75">75%</button>
-                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-[0.65rem] font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="100">Max</button>
+                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-xs font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="25">25%</button>
+                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-xs font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="50">50%</button>
+                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-xs font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="75">75%</button>
+                      <button type="button" class="pct-btn btn-press px-2 py-0.5 bg-surface/50 border border-white/[0.06] rounded-md text-xs font-semibold cursor-pointer transition-all text-txt-3 hover:text-accent hover:border-accent/30" data-pct="100">Max</button>
                     </div>
                   </div>
                   <div class="relative flex items-center">
                     <input type="number" id="loan-amount" class="w-full pr-[5.5rem] text-2xl h-14 rounded-lg bg-base border border-white/[0.04] text-txt font-mono outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_rgba(29,111,216,0.15)]" style="padding:0.55rem 5.5rem 0.55rem 0.75rem" value="100000" min="546">
-                    <button type="button" class="absolute right-14 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wide cursor-pointer transition-all" id="btn-max-loan" style="background:rgba(29,111,216,0.12);border:1px solid rgba(29,111,216,0.25);color:var(--accent)">MAX</button>
+                    <button type="button" class="absolute right-14 px-2 py-0.5 rounded text-[0.7rem] font-bold uppercase tracking-wide cursor-pointer transition-all" id="btn-max-loan" style="background:rgba(29,111,216,0.12);border:1px solid rgba(29,111,216,0.25);color:var(--accent)">MAX</button>
                     <span class="absolute right-3 text-xs font-semibold text-txt-3 pointer-events-none font-mono">sats</span>
                   </div>
-                  <div class="text-[0.65rem] text-err mt-1 min-h-[0.875rem]" id="loan-error-msg"></div>
+                  <div class="text-xs text-err mt-1 min-h-[0.875rem]" id="loan-error-msg"></div>
                 </div>
 
                 <!-- Credit Score card -->
                 <div class="bg-base-light/50 border border-white/[0.06] rounded-xl p-4 mb-4">
                   <div class="flex items-center justify-between mb-3">
-                    <label class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider">Credit Score</label>
+                    <label class="text-sm font-semibold text-txt-3 uppercase tracking-wider">Credit Score</label>
                     <span id="score-display" class="text-xl font-extrabold font-mono text-warn transition-colors">50</span>
                   </div>
                   <!-- Zone labels -->
                   <div class="flex justify-between mb-2 px-0.5">
-                    <span class="text-[0.55rem] font-semibold text-err uppercase tracking-wider">Poor</span>
-                    <span class="text-[0.55rem] font-semibold text-warn uppercase tracking-wider">Fair</span>
-                    <span class="text-[0.55rem] font-semibold text-ok uppercase tracking-wider">Good</span>
-                    <span class="text-[0.55rem] font-semibold text-ok uppercase tracking-wider">Excellent</span>
+                    <span class="text-[0.7rem] font-semibold text-err uppercase tracking-wider">Poor</span>
+                    <span class="text-[0.7rem] font-semibold text-warn uppercase tracking-wider">Fair</span>
+                    <span class="text-[0.7rem] font-semibold text-ok uppercase tracking-wider">Good</span>
+                    <span class="text-[0.7rem] font-semibold text-ok uppercase tracking-wider">Excellent</span>
                   </div>
                   <div class="relative py-2">
                     <div class="score-tooltip score-med" id="score-tooltip"><span>50</span></div>
@@ -904,11 +904,11 @@
                   </div>
                   <!-- Tick marks -->
                   <div class="flex justify-between px-0.5 mt-1">
-                    <span class="text-[0.6rem] text-txt-3">0</span>
-                    <span class="text-[0.6rem] text-txt-3">25</span>
-                    <span class="text-[0.6rem] text-warn font-semibold" id="score-min-label">Min: 50</span>
-                    <span class="text-[0.6rem] text-txt-3">75</span>
-                    <span class="text-[0.6rem] text-txt-3">100</span>
+                    <span class="text-[0.7rem] text-txt-3">0</span>
+                    <span class="text-[0.7rem] text-txt-3">25</span>
+                    <span class="text-[0.7rem] text-warn font-semibold" id="score-min-label">Min: 50</span>
+                    <span class="text-[0.7rem] text-txt-3">75</span>
+                    <span class="text-[0.7rem] text-txt-3">100</span>
                   </div>
                 </div>
 
@@ -951,12 +951,12 @@
                   <table class="w-full text-sm" style="border-collapse:collapse">
                     <thead class="sticky top-0 z-10">
                       <tr>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">#</th>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Amount</th>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Score</th>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Status</th>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">TxID</th>
-                        <th class="text-left px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Time</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">#</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Amount</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Score</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Status</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">TxID</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-txt-3 border-b border-white/[0.06] bg-surface-2">Time</th>
                       </tr>
                     </thead>
                     <tbody id="history-tbody"></tbody>
@@ -999,25 +999,25 @@
                 <div class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:rgba(30,64,175,0.1)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--vault)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <div><span class="text-[0.6rem] text-txt-3 block">Pool</span><span class="font-semibold font-mono text-[0.7rem]">0.05 BCH</span></div>
+                <div><span class="text-[0.7rem] text-txt-3 block">Pool</span><span class="font-semibold font-mono text-xs">0.05 BCH</span></div>
               </div>
               <div class="flex items-center gap-2 px-3 py-2 bg-surface border border-white/[0.06] rounded-lg text-xs">
                 <div class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:rgba(29,111,216,0.1)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
-                <div><span class="text-[0.6rem] text-txt-3 block">Max Loan</span><span class="font-semibold font-mono text-[0.7rem]">500K sats</span></div>
+                <div><span class="text-[0.7rem] text-txt-3 block">Max Loan</span><span class="font-semibold font-mono text-xs">500K sats</span></div>
               </div>
               <div class="flex items-center gap-2 px-3 py-2 bg-surface border border-white/[0.06] rounded-lg text-xs">
                 <div class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:rgba(185,28,28,0.1)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--oracle)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                <div><span class="text-[0.6rem] text-txt-3 block">Min Score</span><span class="font-semibold font-mono text-[0.7rem]">50</span></div>
+                <div><span class="text-[0.7rem] text-txt-3 block">Min Score</span><span class="font-semibold font-mono text-xs">50</span></div>
               </div>
               <div class="flex items-center gap-2 px-3 py-2 bg-surface border border-white/[0.06] rounded-lg text-xs">
                 <div class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:rgba(180,83,9,0.1)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--tokengate)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
                 </div>
-                <div><span class="text-[0.6rem] text-txt-3 block">Gov Tokens</span><span class="font-semibold font-mono text-[0.7rem]">100</span></div>
+                <div><span class="text-[0.7rem] text-txt-3 block">Gov Tokens</span><span class="font-semibold font-mono text-xs">100</span></div>
               </div>
             </div>
             <!-- Timeline -->
@@ -1054,10 +1054,10 @@
             </button>
           </div>
           <div class="flex gap-2 flex-wrap mb-4">
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Treasury</span><span class="font-semibold font-mono text-[0.7rem]">0.10000000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Proposal</span><span class="font-semibold font-mono text-[0.7rem]">0.02000000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Min Votes</span><span class="font-semibold font-mono text-[0.7rem]">100</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Gov Tokens</span><span class="font-semibold font-mono text-[0.7rem]">50</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Treasury</span><span class="font-semibold font-mono text-xs">0.10000000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Proposal</span><span class="font-semibold font-mono text-xs">0.02000000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Min Votes</span><span class="font-semibold font-mono text-xs">100</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Gov Tokens</span><span class="font-semibold font-mono text-xs">50</span></div>
           </div>
           <div class="bg-surface border border-white/[0.06] rounded-xl overflow-hidden" id="timeline-governance" style="display:none">
             <div class="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]" style="background:rgba(16,34,56,0.02)">
@@ -1087,9 +1087,9 @@
             </button>
           </div>
           <div class="flex gap-2 flex-wrap mb-4">
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Deposit</span><span class="font-semibold font-mono text-[0.7rem]">0.03000000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Withdraw</span><span class="font-semibold font-mono text-[0.7rem]">0.01000000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Stake Tokens</span><span class="font-semibold font-mono text-[0.7rem]">25</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Deposit</span><span class="font-semibold font-mono text-xs">0.03000000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Withdraw</span><span class="font-semibold font-mono text-xs">0.01000000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Stake Tokens</span><span class="font-semibold font-mono text-xs">25</span></div>
           </div>
           <div class="bg-surface border border-white/[0.06] rounded-xl overflow-hidden" id="timeline-yield-vault" style="display:none">
             <div class="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]" style="background:rgba(16,34,56,0.02)">
@@ -1120,10 +1120,10 @@
             </button>
           </div>
           <div class="flex gap-2 flex-wrap mb-4">
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Pool</span><span class="font-semibold font-mono text-[0.7rem]">0.08000000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Claim</span><span class="font-semibold font-mono text-[0.7rem]">0.01500000 BCH</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Min Damage</span><span class="font-semibold font-mono text-[0.7rem]">200</span></div>
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Policy Tokens</span><span class="font-semibold font-mono text-[0.7rem]">10</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Pool</span><span class="font-semibold font-mono text-xs">0.08000000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Max Claim</span><span class="font-semibold font-mono text-xs">0.01500000 BCH</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Min Damage</span><span class="font-semibold font-mono text-xs">200</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/[0.06] rounded-full text-xs"><span class="text-txt-3 font-medium">Policy Tokens</span><span class="font-semibold font-mono text-xs">10</span></div>
           </div>
           <div class="bg-surface border border-white/[0.06] rounded-xl overflow-hidden" id="timeline-insurance" style="display:none">
             <div class="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]" style="background:rgba(16,34,56,0.02)">
@@ -1170,9 +1170,9 @@
           <h3 class="text-base font-bold mb-2">Vault</h3>
           <p class="text-sm text-txt-2 leading-relaxed mb-4">UTXO custody with per-transaction spending limits, whitelisted destinations, and covenant continuation</p>
           <div class="flex gap-1.5 flex-wrap">
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Spend Limits</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Whitelist</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Covenant</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Spend Limits</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Whitelist</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Covenant</span>
           </div>
         </div>
         <div class="prim-card-line line-timestate relative overflow-hidden bg-surface border border-white/[0.06] rounded-xl p-7 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl">
@@ -1182,9 +1182,9 @@
           <h3 class="text-base font-bold mb-2">TimeState</h3>
           <p class="text-sm text-txt-2 leading-relaxed mb-4">Phase-based time gates enforced via CLTV: Locked, Restricted, and Unrestricted phases</p>
           <div class="flex gap-1.5 flex-wrap">
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">3 Phases</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">CLTV</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Timelocks</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">3 Phases</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">CLTV</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Timelocks</span>
           </div>
         </div>
         <div class="prim-card-line line-oracle relative overflow-hidden bg-surface border border-white/[0.06] rounded-xl p-7 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl">
@@ -1194,9 +1194,9 @@
           <h3 class="text-base font-bold mb-2">Oracle Proof</h3>
           <p class="text-sm text-txt-2 leading-relaxed mb-4">Off-chain data verified on-chain via Schnorr checkDataSig with domain separation and expiry</p>
           <div class="flex gap-1.5 flex-wrap">
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Schnorr</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Domain Sep</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Expiry</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Schnorr</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Domain Sep</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Expiry</span>
           </div>
         </div>
         <div class="prim-card-line line-tokengate relative overflow-hidden bg-surface border border-white/[0.06] rounded-xl p-7 transition-all hover:border-white/10 hover:-translate-y-1 hover:shadow-xl">
@@ -1206,9 +1206,9 @@
           <h3 class="text-base font-bold mb-2">TokenGate</h3>
           <p class="text-sm text-txt-2 leading-relaxed mb-4">CashToken ownership validation with fungible token gating and introspection opcodes</p>
           <div class="flex gap-1.5 flex-wrap">
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">CashTokens</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Fungible</span>
-            <span class="px-2 py-0.5 bg-surface-2 rounded text-[0.6875rem] text-txt-3 font-medium">Introspect</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">CashTokens</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Fungible</span>
+            <span class="px-2 py-0.5 bg-surface-2 rounded text-xs text-txt-3 font-medium">Introspect</span>
           </div>
         </div>
       </div>
